@@ -1,0 +1,17 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: buster
+
+inputs:
+- name: repo
+
+run:
+  path: ./ci-build.sh
+  dir: repo
+
+outputs:
+- name: binaries
+  path: repos/bin
