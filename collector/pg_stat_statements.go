@@ -45,15 +45,6 @@ func (ScrapeStatements) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometh
         return err
     }
 
-    if err := statDatabase.ToMetrics(namespace, statdatabase, ch); err != nil {
-        return err
-    }
-
-    var databases models.PgDatabaseSlice
-    if err := db.ModelContext(ctx, &databases).Where("datname IN (?)", pg.In(collectDatabases)).
-        Select(); err != nil {
-        return err
-    }
-    return databases.ToMetrics(namespace, statdatabase, ch)
+    return statDatabase.ToMetrics(namespace, statstatements, ch)
 }
 
