@@ -37,6 +37,12 @@ func (r *PgStatActivity) ToMetrics(namespace string, subsystem string, ch chan<-
 	if r.State.Valid {
 		labels["state"] = r.State.String
 	}
+	if r.WaitEventType.Valid {
+		labels["wait_event_type"] = r.WaitEventType.String
+	}
+	if r.BackendType.Valid {
+		labels["backend_type"] = r.BackendType.String
+	}
 
 	// metrics
 	// connections (GaugeValue)

@@ -30,6 +30,12 @@ var (
 	withState = kingpin.Flag("collect.pg_stat_activity.with_state",
 		"Include session state in session statistics").
 		Default("true").Bool()
+	withWaitEventType = kingpin.Flag("collect.pg_stat_activity.with_wait_type",
+		"Include wait_event_type in session statistics").
+		Default("false").Bool()
+	withBackendType = kingpin.Flag("collect.pg_stat_activity.with_backend_type",
+		"Include backend_type in session statistics").
+		Default("false").Bool()
 )
 
 // ScrapeActivity scrapes from pg_stat_bgwriter
@@ -73,6 +79,14 @@ func (ScrapeActivity) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheu
 
 	if *withState {
 		columns += ", state"
+	}
+
+	if *withWaitEventType {
+		columns += ", wait_event_type"
+	}
+
+	if pgversion >= 110000 && *withBackendType {
+		columns += ", backend_type"
 	}
 
 	qs := fmt.Sprintf(`SELECT datid, datname %s, count(1) as connections FROM`+
