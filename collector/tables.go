@@ -14,7 +14,7 @@ const (
 	tables = "tables"
 )
 
-// ScrapeBgWriter scrapes from pg_stat_user_tables
+// ScrapeTables scrapes from pg_stat_user_tables
 type ScrapeTables struct{}
 
 // Name of the Scraper
@@ -27,12 +27,12 @@ func (ScrapeTables) Help() string {
 	return "Collect from pg_stat_user_tables"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeTables) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeTables) Type() ScrapeType {
 	return SCRAPELOCAL
 }

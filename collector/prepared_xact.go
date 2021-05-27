@@ -27,12 +27,12 @@ func (ScrapePreparedXacts) Help() string {
 	return "Collect from pg_prepared_xacts"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapePreparedXacts) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapePreparedXacts) Type() ScrapeType {
 	return SCRAPEGLOBAL
 }

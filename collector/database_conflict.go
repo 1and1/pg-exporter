@@ -14,7 +14,7 @@ const (
 	databaseconflicts = "database_conflicts"
 )
 
-// ScrapeBgWriter scrapes from pg_stat_database_conflicts
+// ScrapeDatabaseConflicts scrapes from pg_stat_database_conflicts
 type ScrapeDatabaseConflicts struct{}
 
 // Name of the Scraper
@@ -27,12 +27,12 @@ func (ScrapeDatabaseConflicts) Help() string {
 	return "Collect from pg_stat_database_conflicts"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeDatabaseConflicts) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeDatabaseConflicts) Type() ScrapeType {
 	return SCRAPEGLOBAL
 }

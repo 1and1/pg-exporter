@@ -45,12 +45,12 @@ func (ScrapeActivity) Help() string {
 	return "Collect from pg_stat_activity"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeActivity) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeActivity) Type() ScrapeType {
 	return SCRAPEGLOBAL
 }

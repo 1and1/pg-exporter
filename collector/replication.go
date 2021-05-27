@@ -27,12 +27,12 @@ func (ScrapeReplication) Help() string {
 	return "Collect from pg_stat_replication"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeReplication) Version() int {
 	return 90200
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeReplication) Type() ScrapeType {
 	return SCRAPEGLOBAL
 }

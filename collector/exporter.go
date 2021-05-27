@@ -49,7 +49,7 @@ type Exporter struct {
 func New(ctx context.Context, pgoptions *pg.Options, metrics Metrics, scrapers []Scraper) *Exporter {
 	// Database exporters should only open one connection
 	pgoptions.PoolSize = 1
-	// set the lock timeout, to minimice possible production impact
+	// set the lock timeout, to minimise possible production impact
 
 	// TODO: this triggers a segfault in some cases, we need to investigate why later
 	/*

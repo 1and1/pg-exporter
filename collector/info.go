@@ -12,7 +12,7 @@ const (
 	info = "info"
 )
 
-// ScrapeSettings scrapes from pg_settings
+// ScrapeInfo scrapes generic PostgreSQL information
 type ScrapeInfo struct{}
 
 // Name of the Scraper
@@ -25,12 +25,12 @@ func (ScrapeInfo) Help() string {
 	return "Collect postgresql information"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeInfo) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeInfo) Type() ScrapeType {
 	return SCRAPEGLOBAL
 }

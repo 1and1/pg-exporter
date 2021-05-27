@@ -27,12 +27,12 @@ func (ScrapeTXID) Help() string {
 	return "Collect from txid_current()"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeTXID) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeTXID) Type() ScrapeType {
 	return SCRAPEGLOBAL
 }

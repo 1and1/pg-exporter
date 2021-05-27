@@ -27,12 +27,12 @@ func (ScrapeBgWriter) Help() string {
 	return "Collect from pg_stat_bgwriter"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeBgWriter) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeBgWriter) Type() ScrapeType {
 	return SCRAPEGLOBAL
 }

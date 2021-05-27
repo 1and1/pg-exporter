@@ -27,12 +27,12 @@ func (ScrapeStatements) Help() string {
     return "Collect from pg_stat_statements"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeStatements) Version() int {
     return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeStatements) Type() ScrapeType {
     return SCRAPEGLOBAL
 }

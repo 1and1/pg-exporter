@@ -40,12 +40,12 @@ func (ScrapeSettings) Help() string {
 	return "Collect from pg_settings"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeSettings) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeSettings) Type() ScrapeType {
 	return SCRAPEGLOBAL
 }

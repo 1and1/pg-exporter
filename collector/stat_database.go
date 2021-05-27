@@ -14,7 +14,7 @@ const (
 	statdatabase = "database"
 )
 
-// ScrapeBgWriter scrapes from pg_stat_bgwriter
+// ScrapeDatabase scrapes from pg_stat_database
 type ScrapeDatabase struct{}
 
 // Name of the Scraper
@@ -27,12 +27,12 @@ func (ScrapeDatabase) Help() string {
 	return "Collect from pg_stat_database"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeDatabase) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeDatabase) Type() ScrapeType {
 	return SCRAPEGLOBAL
 }

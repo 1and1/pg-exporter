@@ -27,12 +27,12 @@ func (ScrapeArchiver) Help() string {
 	return "Collect from pg_stat_archiver"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeArchiver) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeArchiver) Type() ScrapeType {
 	return SCRAPEGLOBAL
 }

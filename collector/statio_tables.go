@@ -14,7 +14,7 @@ const (
 	iotables = "tablesio"
 )
 
-// ScrapeBgWriter scrapes from pg_stat_user_tables
+// ScrapeIOTables scrapes from pg_statio_user_tables
 type ScrapeIOTables struct{}
 
 // Name of the Scraper
@@ -27,12 +27,12 @@ func (ScrapeIOTables) Help() string {
 	return "Collect from pg_statio_user_tables"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeIOTables) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeIOTables) Type() ScrapeType {
 	return SCRAPELOCAL
 }

@@ -14,7 +14,7 @@ const (
 	locks = "locks"
 )
 
-// ScrapeBgWriter scrapes from pg_stat_bgwriter
+// ScrapeLocks scrapes from pg_locks
 type ScrapeLocks struct{}
 
 // Name of the Scraper
@@ -27,12 +27,12 @@ func (ScrapeLocks) Help() string {
 	return "Collect from pg_locks"
 }
 
-// minimum PostgreSQL version
+// Version returns minimum PostgreSQL version
 func (ScrapeLocks) Version() int {
 	return 0
 }
 
-// scrape type
+// Type returns the scrape type
 func (ScrapeLocks) Type() ScrapeType {
 	return SCRAPEGLOBAL
 }
