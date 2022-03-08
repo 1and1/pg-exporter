@@ -49,6 +49,7 @@ var scrapers = map[collector.Scraper]bool{
 	collector.ScrapeReplication{}:       true,
 	collector.ScrapePreparedXacts{}:     true,
 	collector.ScrapeIOTables{}:          true,
+	collector.ScrapeWal{}:               true,
 	collector.ScrapeStatements{}:        false,
 }
 
