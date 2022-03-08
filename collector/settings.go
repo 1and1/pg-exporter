@@ -16,15 +16,15 @@ const (
 )
 
 type pgSetting struct {
-	tableName struct{} `sql:"pg_settings"`
-	Name      string   `sql:"name"`
-	Setting   string   `sql:"setting"`
-	ShortDesc string   `sql:"short_desc"`
-	Unit      string   `sql:"unit"`
-	Vartype   string   `sql:"vartype"`
-	MinVal    string   `sql:"min_val"`
-	MaxVal    string   `sql:"max_val"`
-	Enumvals  []string `sql:"enumvals,array"`
+	tableName struct{} `pg:"pg_settings"`
+	Name      string   `pg:"name"`
+	Setting   string   `pg:"setting"`
+	ShortDesc string   `pg:"short_desc"`
+	Unit      string   `pg:"unit"`
+	Vartype   string   `pg:"vartype"`
+	MinVal    string   `pg:"min_val"`
+	MaxVal    string   `pg:"max_val"`
+	Enumvals  []string `pg:"enumvals,array"`
 }
 
 // ScrapeSettings scrapes from pg_settings

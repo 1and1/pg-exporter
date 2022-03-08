@@ -35,7 +35,7 @@ func parseModel(t *types.Type) *modelDescription {
         tag := reflect.StructTag(member.Tags)
         helpTag := tag.Get("help")
         metricTag := tagparser.Parse(tag.Get("metric"))
-        sqlTag := tagparser.Parse(tag.Get("sql"))
+        pgTag := tagparser.Parse(tag.Get("pg"))
 
         // check if we have a metric tag, if not relay on the sql name
         var metricName string
@@ -46,8 +46,8 @@ func parseModel(t *types.Type) *modelDescription {
 
         if metricTag.Name != "" {
             metricName = metricTag.Name
-        } else if sqlTag.Name != "" {
-            metricName = sqlTag.Name
+        } else if pgTag.Name != "" {
+            metricName = pgTag.Name
         } else {
             // we skip every column where we can't find a valid name
             continue
