@@ -6,7 +6,7 @@ import (
 
 // +metric=slice
 type PgStatDatabase struct {
-	tableName    struct{}     `pg:"pg_stat_database"`
+	tableName    struct{}     `pg:"pg_stat_database,discard_unknown_columns"`
 	DatID        int64        `pg:"datid" help:"OID of a database" metric:"database_id,type:label"`
 	DatName      string       `pg:"datname" help:"Name of this database" metric:"database,type:label"`
 	NumBackends  int          `pg:"numbackends" help:"Number of backends currently connected to this database" metric:"backends,type:gauge"`
@@ -23,7 +23,16 @@ type PgStatDatabase struct {
 	TempFiles    int64        `pg:"temp_files" help:"Number of temporary files created by queries in this database"  metric:"temp_files_total"`
 	TempBytes    int64        `pg:"temp_bytes" help:"Total amount of data written to temporary files by queries in this database"  metric:"temp_bytes_total"`
 	Deadlocks    int64        `pg:"deadlocks" help:"Number of deadlocks detected in this database"  metric:"deadlocks_total"`
+	checksumFailures int64    `pg:"checksum_failures" help:"Number of data page checksum failures detected in this database" metric:"checksum_failures_count"` // new in PG12
+	checksumLastFailure time.Time `pg:"checksum_last_failure" help:"Time at which the last data page checksum failure was detected in this database" metric:"checksum_last_failure"` // new in PG12
 	BlkReadTime  Milliseconds `pg:"blk_read_time" help:"Time spent reading data file blocks by backends in this database" metric:"blk_read_seconds_total"`
 	BlkWriteTime Milliseconds `pg:"blk_write_time" help:"Time spent writing data file blocks by backends in this database" metric:"blk_write_seconds_total"`
+	sessionTime  Milliseconds `pg:"session_time" help:"Time spent by database sessions in this database, in milliseconds" metric:"session_time_total"` // new in PG14
+	activeTime   Milliseconds `pg:"active_time" help:"Time spent executing SQL statements in this database, in milliseconds" metric:"active_time_total"` // new in PG14
+	idleInTransactionTime Milliseconds `pg:"idle_in_transaction_time" help:"Time spent idling while in a transaction in this database, in milliseconds" metric:"idle_in_transaction_time_total"` // new in PG14
+	sessions     int64        `pg:"sessions" help:"Total number of sessions established to this database" metric:"sessions_count"` // new in PG14
+	sessionsAbandoned int64   `pg:"sessions_abandoned" help:"Number of database sessions to this database that were terminated because connection to the client was lost" metric:"sessions_abandoned_count"` // new in PG14
+	sessionsFatal int64       `pg:"sessions_fatal" help:"Number of database sessions to this database that were terminated by fatal errors" metric:"sessions_fatal_count"` // new in PG14
+	sessionsKilled int64      `pg:"sessions_killed" help:"Number of database sessions to this database that were terminated by operator intervention" metric:"sessions_killed_count"` // new in PG14
 	StatsReset   time.Time    `pg:"stats_reset" help:"Time at which these statistics were last reset"`
 }
