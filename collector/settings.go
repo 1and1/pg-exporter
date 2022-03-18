@@ -120,7 +120,7 @@ func (ScrapeSettings) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheu
 			setting.ShortDesc += " min=" + setting.MinVal
 		}
 		if setting.MaxVal != "" {
-			setting.ShortDesc += " max=" + setting.MinVal
+			setting.ShortDesc += " max=" + setting.MaxVal
 		}
 
 		ch <- prometheus.MustNewConstMetric(
