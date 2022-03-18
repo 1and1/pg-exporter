@@ -89,32 +89,35 @@ func (ScrapeSettings) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheu
 			value = realValue
 		}
 
-		// get the pre/suffix if any from the value
+		// get the pre/suffix if any from the value unless it's negative
 
 		unitCaptures := unitRE.FindStringSubmatch(setting.Unit)
 
-		// check if we have an unit type
-		switch unitCaptures[2] {
-		case "min":
-			// convert minute to seconds
-			value = value * 60
-		case "ms":
-			// convert milliseconds to seconds
-			value = value / 1000
-		case "kB":
-			// convert kilobytes to bytes
-			value = value * 1024
-		case "MB":
-			// convert megabytes to bytes
-			value = value * 1024 * 1024
-		}
-		if unitCaptures[1] != "" {
-			multiplicator, err := strconv.Atoi(unitCaptures[1])
-			if err != nil {
-				return err
+		if value >= 0 {
+			// check if we have an unit type
+			switch unitCaptures[2] {
+			case "min":
+				// convert minute to seconds
+				value = value * 60
+			case "ms":
+				// convert milliseconds to seconds
+				value = value / 1000
+			case "kB":
+				// convert kilobytes to bytes
+				value = value * 1024
+			case "MB":
+				// convert megabytes to bytes
+				value = value * 1024 * 1024
 			}
-			value = value * float64(multiplicator)
+			if unitCaptures[1] != "" {
+				multiplicator, err := strconv.Atoi(unitCaptures[1])
+				if err != nil {
+					return err
+				}
+				value = value * float64(multiplicator)
+			}
 		}
+
 		// create a metric from this
 		if setting.MinVal != "" {
 			setting.ShortDesc += " min=" + setting.MinVal
