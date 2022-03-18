@@ -1,0 +1,28 @@
+select current_setting('server_version_num')::int / 10000 >= 14 as is_pg_14;
+ is_pg_14 
+----------
+ t
+(1 row)
+
+show fsync; -- needs to be on for postgresql_wal_sync_count
+ fsync 
+-------
+ on
+(1 row)
+
+select pg_stat_reset_shared('wal');
+ pg_stat_reset_shared 
+----------------------
+ 
+(1 row)
+
+\! curl -sf localhost:9135/metrics | grep "^postgresql_wal_" | sed -e 's/ \([1-9]\|0\.\).*/ NNN/'
+postgresql_wal_buffers_full_count 0
+postgresql_wal_bytes_total NNN
+postgresql_wal_fpi_total NNN
+postgresql_wal_records_total NNN
+postgresql_wal_stats_reset NNN
+postgresql_wal_sync_count NNN
+postgresql_wal_sync_time_total 0
+postgresql_wal_write_count NNN
+postgresql_wal_write_time_total 0

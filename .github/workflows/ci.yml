@@ -1,0 +1,32 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+
+    strategy:
+      matrix:
+        pg:
+          - 14
+          - 13
+          - 12
+          - 11
+          - 10
+
+    name: 🐘 PostgreSQL ${{ matrix.pg }}
+    runs-on: ubuntu-latest
+    container: pgxn/pgxn-tools
+
+    steps:
+      - name: Start PostgreSQL ${{ matrix.pg }}
+        run: pg-start ${{ matrix.pg }}
+      - name: Create root user
+        run: sudo -u postgres createuser --superuser root
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Install extra build dependencies
+        run: sudo apt-get install -y golang
+      - name: Build
+        run: go generate && go build
+      - name: Test on PostgreSQL ${{ matrix.pg }}
+        run: if ! make installcheck; then cat regression.diffs; exit 1; fi

@@ -1,0 +1,944 @@
+select current_setting('server_version_num')::int / 10000 as pg_major_version;
+ pg_major_version 
+------------------
+               12
+(1 row)
+
+-- remove all values from the stats
+-- remove database ids
+-- remove Go and PostgreSQL version numbers
+-- remove postgresql_locks_count{mode="RowExclusiveLock"} line which sometimes pops up
+-- remove debug_discard_caches help since its max value depends on --enable-cassert
+\! curl -sf localhost:9135/metrics | sed -e 's/^\([a-z].*\) .*/\1/' -e 's/database_id="[0-9]*"/database_id=""/' -e 's/version="[^"]*"/version=""/' -e '/mode="RowExclusiveLock"/d' -e '/# HELP postgresql_settings_debug_discard_caches/d'
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"}
+go_gc_duration_seconds{quantile="0.25"}
+go_gc_duration_seconds{quantile="0.5"}
+go_gc_duration_seconds{quantile="0.75"}
+go_gc_duration_seconds{quantile="1"}
+go_gc_duration_seconds_sum
+go_gc_duration_seconds_count
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version=""}
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total
+# HELP go_memstats_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE go_memstats_gc_cpu_fraction gauge
+go_memstats_gc_cpu_fraction
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads
+# HELP pg_exporter_build_info A metric with a constant '1' value labeled by version, revision, branch, and goversion from which pg_exporter was built.
+# TYPE pg_exporter_build_info gauge
+pg_exporter_build_info{branch="",goversion="",revision="",version=""}
+# HELP postgresql_archiver_archived_count_total Number of WAL files that have been successfully archived
+# TYPE postgresql_archiver_archived_count_total counter
+postgresql_archiver_archived_count_total
+# HELP postgresql_archiver_failed_count_total Number of failed attempts for archiving WAL files
+# TYPE postgresql_archiver_failed_count_total counter
+postgresql_archiver_failed_count_total
+# HELP postgresql_archiver_last_archived_time Time of the last successful archive operation
+# TYPE postgresql_archiver_last_archived_time counter
+postgresql_archiver_last_archived_time
+# HELP postgresql_archiver_last_failed_time Time of the last failed archival operation
+# TYPE postgresql_archiver_last_failed_time counter
+postgresql_archiver_last_failed_time
+# HELP postgresql_archiver_stats_reset Time at which these statistics were last reset
+# TYPE postgresql_archiver_stats_reset counter
+postgresql_archiver_stats_reset
+# HELP postgresql_bgwriter_buffers_alloc_total Number of buffers allocated
+# TYPE postgresql_bgwriter_buffers_alloc_total counter
+postgresql_bgwriter_buffers_alloc_total
+# HELP postgresql_bgwriter_buffers_backend_fsync_total Number of times a backend had to execute its own fsync call
+# TYPE postgresql_bgwriter_buffers_backend_fsync_total counter
+postgresql_bgwriter_buffers_backend_fsync_total
+# HELP postgresql_bgwriter_buffers_backend_total Number of buffers written directly by a backend
+# TYPE postgresql_bgwriter_buffers_backend_total counter
+postgresql_bgwriter_buffers_backend_total
+# HELP postgresql_bgwriter_buffers_checkpoint_total Number of buffers written during checkpoints
+# TYPE postgresql_bgwriter_buffers_checkpoint_total counter
+postgresql_bgwriter_buffers_checkpoint_total
+# HELP postgresql_bgwriter_buffers_clean_total Number of buffers written by the background writer
+# TYPE postgresql_bgwriter_buffers_clean_total counter
+postgresql_bgwriter_buffers_clean_total
+# HELP postgresql_bgwriter_checkpoint_sync_seconds_total Total amount of time that has been spent in the portion of checkpoint processing where files are synchronized to disk, in milliseconds
+# TYPE postgresql_bgwriter_checkpoint_sync_seconds_total counter
+postgresql_bgwriter_checkpoint_sync_seconds_total
+# HELP postgresql_bgwriter_checkpoint_write_seconds_total Total amount of time that has been spent in the portion of checkpoint processing where files are written to disk, in milliseconds
+# TYPE postgresql_bgwriter_checkpoint_write_seconds_total counter
+postgresql_bgwriter_checkpoint_write_seconds_total
+# HELP postgresql_bgwriter_checkpoints_req_total Number of requested checkpoints that have been performed
+# TYPE postgresql_bgwriter_checkpoints_req_total counter
+postgresql_bgwriter_checkpoints_req_total
+# HELP postgresql_bgwriter_checkpoints_timed_total Number of scheduled checkpoints that have been performed
+# TYPE postgresql_bgwriter_checkpoints_timed_total counter
+postgresql_bgwriter_checkpoints_timed_total
+# HELP postgresql_bgwriter_maxwritten_clean_total Number of times the background writer stopped a cleaning scan because it had written too many buffers
+# TYPE postgresql_bgwriter_maxwritten_clean_total counter
+postgresql_bgwriter_maxwritten_clean_total
+# HELP postgresql_bgwriter_stats_reset Time at which these statistics were last reset
+# TYPE postgresql_bgwriter_stats_reset counter
+postgresql_bgwriter_stats_reset
+# HELP postgresql_database_backends Number of backends currently connected to this database
+# TYPE postgresql_database_backends gauge
+postgresql_database_backends{database="contrib_regression",database_id=""}
+# HELP postgresql_database_blk_read_seconds_total Time spent reading data file blocks by backends in this database
+# TYPE postgresql_database_blk_read_seconds_total counter
+postgresql_database_blk_read_seconds_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_blk_write_seconds_total Time spent writing data file blocks by backends in this database
+# TYPE postgresql_database_blk_write_seconds_total counter
+postgresql_database_blk_write_seconds_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_blocks_hit_total Number of times disk blocks were found already in the buffer cache, so that a read was not necessary
+# TYPE postgresql_database_blocks_hit_total counter
+postgresql_database_blocks_hit_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_blocks_read_total Number of disk blocks read in this database
+# TYPE postgresql_database_blocks_read_total counter
+postgresql_database_blocks_read_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_conflicts_confl_bufferpin_total Number of queries in this database that have been canceled due to pinned buffers
+# TYPE postgresql_database_conflicts_confl_bufferpin_total counter
+postgresql_database_conflicts_confl_bufferpin_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_conflicts_confl_deadlock_total Number of queries in this database that have been canceled due to deadlocks
+# TYPE postgresql_database_conflicts_confl_deadlock_total counter
+postgresql_database_conflicts_confl_deadlock_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_conflicts_confl_lock_total Number of queries in this database that have been canceled due to lock timeouts
+# TYPE postgresql_database_conflicts_confl_lock_total counter
+postgresql_database_conflicts_confl_lock_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_conflicts_confl_snapshot_total Number of queries in this database that have been canceled due to old snapshots
+# TYPE postgresql_database_conflicts_confl_snapshot_total counter
+postgresql_database_conflicts_confl_snapshot_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_conflicts_confl_tablespace_total Number of queries in this database that have been canceled due to dropped tablespaces
+# TYPE postgresql_database_conflicts_confl_tablespace_total counter
+postgresql_database_conflicts_confl_tablespace_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_conflicts_total Number of queries canceled due to conflicts with recovery in this database
+# TYPE postgresql_database_conflicts_total counter
+postgresql_database_conflicts_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_deadlocks_total Number of deadlocks detected in this database
+# TYPE postgresql_database_deadlocks_total counter
+postgresql_database_deadlocks_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_frozen_xid All transaction IDs before this one have been replaced with a permanent transaction ID in this database
+# TYPE postgresql_database_frozen_xid counter
+postgresql_database_frozen_xid{database="contrib_regression"}
+# HELP postgresql_database_min_mxid All multixact IDs before this one have been replaced with a transaction ID in this database
+# TYPE postgresql_database_min_mxid counter
+postgresql_database_min_mxid{database="contrib_regression"}
+# HELP postgresql_database_rows_deleted_total Number of rows deleted by queries in this database
+# TYPE postgresql_database_rows_deleted_total counter
+postgresql_database_rows_deleted_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_rows_fetched_total Number of rows fetched by queries in this database
+# TYPE postgresql_database_rows_fetched_total counter
+postgresql_database_rows_fetched_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_rows_inserted_total Number of rows inserted by queries in this database
+# TYPE postgresql_database_rows_inserted_total counter
+postgresql_database_rows_inserted_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_rows_returned_total Number of rows returned by queries in this database
+# TYPE postgresql_database_rows_returned_total counter
+postgresql_database_rows_returned_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_rows_updated_total Number of rows updated by queries in this database
+# TYPE postgresql_database_rows_updated_total counter
+postgresql_database_rows_updated_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_stats_reset Time at which these statistics were last reset
+# TYPE postgresql_database_stats_reset counter
+postgresql_database_stats_reset{database="contrib_regression",database_id=""}
+# HELP postgresql_database_temp_bytes_total Total amount of data written to temporary files by queries in this database
+# TYPE postgresql_database_temp_bytes_total counter
+postgresql_database_temp_bytes_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_temp_files_total Number of temporary files created by queries in this database
+# TYPE postgresql_database_temp_files_total counter
+postgresql_database_temp_files_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_xact_commited_total Number of transactions in this database that have been committed
+# TYPE postgresql_database_xact_commited_total counter
+postgresql_database_xact_commited_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_xact_rolledback_total Number of transactions in this database that have been rolled back
+# TYPE postgresql_database_xact_rolledback_total counter
+postgresql_database_xact_rolledback_total{database="contrib_regression",database_id=""}
+# HELP postgresql_exporter_collector_duration_seconds Collector time duration.
+# TYPE postgresql_exporter_collector_duration_seconds gauge
+postgresql_exporter_collector_duration_seconds{collector="collect.info"}
+postgresql_exporter_collector_duration_seconds{collector="collect.pg_locks"}
+postgresql_exporter_collector_duration_seconds{collector="collect.pg_prepared_xacts"}
+postgresql_exporter_collector_duration_seconds{collector="collect.pg_settings"}
+postgresql_exporter_collector_duration_seconds{collector="collect.pg_stat_activity"}
+postgresql_exporter_collector_duration_seconds{collector="collect.pg_stat_archiver"}
+postgresql_exporter_collector_duration_seconds{collector="collect.pg_stat_bgwriter"}
+postgresql_exporter_collector_duration_seconds{collector="collect.pg_stat_database"}
+postgresql_exporter_collector_duration_seconds{collector="collect.pg_stat_database_conflicts"}
+postgresql_exporter_collector_duration_seconds{collector="collect.pg_stat_replication"}
+postgresql_exporter_collector_duration_seconds{collector="collect.pg_stat_user_tables.contrib_regression"}
+postgresql_exporter_collector_duration_seconds{collector="collect.pg_statio_user_tables.contrib_regression"}
+postgresql_exporter_collector_duration_seconds{collector="connection"}
+# HELP postgresql_exporter_last_scrape_error Whether the last scrape of metrics from PostgreSQL resulted in an error (1 for error, 0 for success).
+# TYPE postgresql_exporter_last_scrape_error gauge
+postgresql_exporter_last_scrape_error
+# HELP postgresql_exporter_scrapes_total Total number of times PostgreSQL was scraped for metrics.
+# TYPE postgresql_exporter_scrapes_total counter
+postgresql_exporter_scrapes_total
+# HELP postgresql_info information about the PostgreSQL instance
+# TYPE postgresql_info gauge
+postgresql_info{server_version=""}
+# HELP postgresql_locks_count Number of locks per state
+# TYPE postgresql_locks_count gauge
+postgresql_locks_count{granted="true",locktype="relation",mode="AccessShareLock",scope_type="shared object"}
+postgresql_locks_count{granted="true",locktype="virtualxid",mode="ExclusiveLock",scope_type="transaction"}
+postgresql_locks_count{database="contrib_regression",granted="true",locktype="relation",mode="AccessShareLock",scope_type="database"}
+# HELP postgresql_sessions_connections Number of active connections
+# TYPE postgresql_sessions_connections gauge
+postgresql_sessions_connections{database="contrib_regression",database_id="",state="active"}
+postgresql_sessions_connections{database="contrib_regression",database_id="",state="idle"}
+# HELP postgresql_settings_allow_system_table_mods Allows modifications of the structure of system tables. (bool)
+# TYPE postgresql_settings_allow_system_table_mods gauge
+postgresql_settings_allow_system_table_mods
+# HELP postgresql_settings_archive_timeout Forces a switch to the next WAL file if a new file has not been started within N seconds. min=0 max=1073741823
+# TYPE postgresql_settings_archive_timeout gauge
+postgresql_settings_archive_timeout
+# HELP postgresql_settings_array_nulls Enable input of NULL elements in arrays. (bool)
+# TYPE postgresql_settings_array_nulls gauge
+postgresql_settings_array_nulls
+# HELP postgresql_settings_authentication_timeout Sets the maximum allowed time to complete client authentication. min=1 max=600
+# TYPE postgresql_settings_authentication_timeout gauge
+postgresql_settings_authentication_timeout
+# HELP postgresql_settings_autovacuum Starts the autovacuum subprocess. (bool)
+# TYPE postgresql_settings_autovacuum gauge
+postgresql_settings_autovacuum
+# HELP postgresql_settings_autovacuum_analyze_scale_factor Number of tuple inserts, updates, or deletes prior to analyze as a fraction of reltuples. min=0 max=100
+# TYPE postgresql_settings_autovacuum_analyze_scale_factor gauge
+postgresql_settings_autovacuum_analyze_scale_factor
+# HELP postgresql_settings_autovacuum_analyze_threshold Minimum number of tuple inserts, updates, or deletes prior to analyze. min=0 max=2147483647
+# TYPE postgresql_settings_autovacuum_analyze_threshold gauge
+postgresql_settings_autovacuum_analyze_threshold
+# HELP postgresql_settings_autovacuum_freeze_max_age Age at which to autovacuum a table to prevent transaction ID wraparound. min=100000 max=2000000000
+# TYPE postgresql_settings_autovacuum_freeze_max_age gauge
+postgresql_settings_autovacuum_freeze_max_age
+# HELP postgresql_settings_autovacuum_max_workers Sets the maximum number of simultaneously running autovacuum worker processes. min=1 max=262143
+# TYPE postgresql_settings_autovacuum_max_workers gauge
+postgresql_settings_autovacuum_max_workers
+# HELP postgresql_settings_autovacuum_multixact_freeze_max_age Multixact age at which to autovacuum a table to prevent multixact wraparound. min=10000 max=2000000000
+# TYPE postgresql_settings_autovacuum_multixact_freeze_max_age gauge
+postgresql_settings_autovacuum_multixact_freeze_max_age
+# HELP postgresql_settings_autovacuum_naptime Time to sleep between autovacuum runs. min=1 max=2147483
+# TYPE postgresql_settings_autovacuum_naptime gauge
+postgresql_settings_autovacuum_naptime
+# HELP postgresql_settings_autovacuum_vacuum_cost_delay Vacuum cost delay in milliseconds, for autovacuum. min=-1 max=100
+# TYPE postgresql_settings_autovacuum_vacuum_cost_delay gauge
+postgresql_settings_autovacuum_vacuum_cost_delay
+# HELP postgresql_settings_autovacuum_vacuum_cost_limit Vacuum cost amount available before napping, for autovacuum. min=-1 max=10000
+# TYPE postgresql_settings_autovacuum_vacuum_cost_limit gauge
+postgresql_settings_autovacuum_vacuum_cost_limit
+# HELP postgresql_settings_autovacuum_vacuum_scale_factor Number of tuple updates or deletes prior to vacuum as a fraction of reltuples. min=0 max=100
+# TYPE postgresql_settings_autovacuum_vacuum_scale_factor gauge
+postgresql_settings_autovacuum_vacuum_scale_factor
+# HELP postgresql_settings_autovacuum_vacuum_threshold Minimum number of tuple updates or deletes prior to vacuum. min=0 max=2147483647
+# TYPE postgresql_settings_autovacuum_vacuum_threshold gauge
+postgresql_settings_autovacuum_vacuum_threshold
+# HELP postgresql_settings_autovacuum_work_mem Sets the maximum memory to be used by each autovacuum worker process. min=-1 max=2147483647
+# TYPE postgresql_settings_autovacuum_work_mem gauge
+postgresql_settings_autovacuum_work_mem
+# HELP postgresql_settings_backend_flush_after Number of pages after which previously performed writes are flushed to disk. min=0 max=256
+# TYPE postgresql_settings_backend_flush_after gauge
+postgresql_settings_backend_flush_after
+# HELP postgresql_settings_bgwriter_delay Background writer sleep time between rounds. min=10 max=10000
+# TYPE postgresql_settings_bgwriter_delay gauge
+postgresql_settings_bgwriter_delay
+# HELP postgresql_settings_bgwriter_flush_after Number of pages after which previously performed writes are flushed to disk. min=0 max=256
+# TYPE postgresql_settings_bgwriter_flush_after gauge
+postgresql_settings_bgwriter_flush_after
+# HELP postgresql_settings_bgwriter_lru_maxpages Background writer maximum number of LRU pages to flush per round. min=0 max=1073741823
+# TYPE postgresql_settings_bgwriter_lru_maxpages gauge
+postgresql_settings_bgwriter_lru_maxpages
+# HELP postgresql_settings_bgwriter_lru_multiplier Multiple of the average buffer usage to free per round. min=0 max=10
+# TYPE postgresql_settings_bgwriter_lru_multiplier gauge
+postgresql_settings_bgwriter_lru_multiplier
+# HELP postgresql_settings_block_size Shows the size of a disk block. min=8192 max=8192
+# TYPE postgresql_settings_block_size gauge
+postgresql_settings_block_size
+# HELP postgresql_settings_bonjour Enables advertising the server via Bonjour. (bool)
+# TYPE postgresql_settings_bonjour gauge
+postgresql_settings_bonjour
+# HELP postgresql_settings_check_function_bodies Check function bodies during CREATE FUNCTION. (bool)
+# TYPE postgresql_settings_check_function_bodies gauge
+postgresql_settings_check_function_bodies
+# HELP postgresql_settings_checkpoint_completion_target Time spent flushing dirty buffers during checkpoint, as fraction of checkpoint interval. min=0 max=1
+# TYPE postgresql_settings_checkpoint_completion_target gauge
+postgresql_settings_checkpoint_completion_target
+# HELP postgresql_settings_checkpoint_flush_after Number of pages after which previously performed writes are flushed to disk. min=0 max=256
+# TYPE postgresql_settings_checkpoint_flush_after gauge
+postgresql_settings_checkpoint_flush_after
+# HELP postgresql_settings_checkpoint_timeout Sets the maximum time between automatic WAL checkpoints. min=30 max=86400
+# TYPE postgresql_settings_checkpoint_timeout gauge
+postgresql_settings_checkpoint_timeout
+# HELP postgresql_settings_checkpoint_warning Enables warnings if checkpoint segments are filled more frequently than this. min=0 max=2147483647
+# TYPE postgresql_settings_checkpoint_warning gauge
+postgresql_settings_checkpoint_warning
+# HELP postgresql_settings_commit_delay Sets the delay in microseconds between transaction commit and flushing WAL to disk. min=0 max=100000
+# TYPE postgresql_settings_commit_delay gauge
+postgresql_settings_commit_delay
+# HELP postgresql_settings_commit_siblings Sets the minimum concurrent open transactions before performing commit_delay. min=0 max=1000
+# TYPE postgresql_settings_commit_siblings gauge
+postgresql_settings_commit_siblings
+# HELP postgresql_settings_cpu_index_tuple_cost Sets the planner's estimate of the cost of processing each index entry during an index scan. min=0 max=1.79769e+308
+# TYPE postgresql_settings_cpu_index_tuple_cost gauge
+postgresql_settings_cpu_index_tuple_cost
+# HELP postgresql_settings_cpu_operator_cost Sets the planner's estimate of the cost of processing each operator or function call. min=0 max=1.79769e+308
+# TYPE postgresql_settings_cpu_operator_cost gauge
+postgresql_settings_cpu_operator_cost
+# HELP postgresql_settings_cpu_tuple_cost Sets the planner's estimate of the cost of processing each tuple (row). min=0 max=1.79769e+308
+# TYPE postgresql_settings_cpu_tuple_cost gauge
+postgresql_settings_cpu_tuple_cost
+# HELP postgresql_settings_cursor_tuple_fraction Sets the planner's estimate of the fraction of a cursor's rows that will be retrieved. min=0 max=1
+# TYPE postgresql_settings_cursor_tuple_fraction gauge
+postgresql_settings_cursor_tuple_fraction
+# HELP postgresql_settings_data_checksums Shows whether data checksums are turned on for this cluster. (bool)
+# TYPE postgresql_settings_data_checksums gauge
+postgresql_settings_data_checksums
+# HELP postgresql_settings_data_directory_mode Mode of the data directory. min=0 max=511
+# TYPE postgresql_settings_data_directory_mode gauge
+postgresql_settings_data_directory_mode
+# HELP postgresql_settings_data_sync_retry Whether to continue running after a failure to sync data files. (bool)
+# TYPE postgresql_settings_data_sync_retry gauge
+postgresql_settings_data_sync_retry
+# HELP postgresql_settings_db_user_namespace Enables per-database user names. (bool)
+# TYPE postgresql_settings_db_user_namespace gauge
+postgresql_settings_db_user_namespace
+# HELP postgresql_settings_deadlock_timeout Sets the time to wait on a lock before checking for deadlock. min=1 max=2147483647
+# TYPE postgresql_settings_deadlock_timeout gauge
+postgresql_settings_deadlock_timeout
+# HELP postgresql_settings_debug_assertions Shows whether the running server has assertion checks enabled. (bool)
+# TYPE postgresql_settings_debug_assertions gauge
+postgresql_settings_debug_assertions
+# HELP postgresql_settings_debug_pretty_print Indents parse and plan tree displays. (bool)
+# TYPE postgresql_settings_debug_pretty_print gauge
+postgresql_settings_debug_pretty_print
+# HELP postgresql_settings_debug_print_parse Logs each query's parse tree. (bool)
+# TYPE postgresql_settings_debug_print_parse gauge
+postgresql_settings_debug_print_parse
+# HELP postgresql_settings_debug_print_plan Logs each query's execution plan. (bool)
+# TYPE postgresql_settings_debug_print_plan gauge
+postgresql_settings_debug_print_plan
+# HELP postgresql_settings_debug_print_rewritten Logs each query's rewritten parse tree. (bool)
+# TYPE postgresql_settings_debug_print_rewritten gauge
+postgresql_settings_debug_print_rewritten
+# HELP postgresql_settings_default_statistics_target Sets the default statistics target. min=1 max=10000
+# TYPE postgresql_settings_default_statistics_target gauge
+postgresql_settings_default_statistics_target
+# HELP postgresql_settings_default_transaction_deferrable Sets the default deferrable status of new transactions. (bool)
+# TYPE postgresql_settings_default_transaction_deferrable gauge
+postgresql_settings_default_transaction_deferrable
+# HELP postgresql_settings_default_transaction_read_only Sets the default read-only status of new transactions. (bool)
+# TYPE postgresql_settings_default_transaction_read_only gauge
+postgresql_settings_default_transaction_read_only
+# HELP postgresql_settings_effective_cache_size Sets the planner's assumption about the total size of the data caches. min=1 max=2147483647
+# TYPE postgresql_settings_effective_cache_size gauge
+postgresql_settings_effective_cache_size
+# HELP postgresql_settings_effective_io_concurrency Number of simultaneous requests that can be handled efficiently by the disk subsystem. min=0 max=1000
+# TYPE postgresql_settings_effective_io_concurrency gauge
+postgresql_settings_effective_io_concurrency
+# HELP postgresql_settings_enable_bitmapscan Enables the planner's use of bitmap-scan plans. (bool)
+# TYPE postgresql_settings_enable_bitmapscan gauge
+postgresql_settings_enable_bitmapscan
+# HELP postgresql_settings_enable_gathermerge Enables the planner's use of gather merge plans. (bool)
+# TYPE postgresql_settings_enable_gathermerge gauge
+postgresql_settings_enable_gathermerge
+# HELP postgresql_settings_enable_hashagg Enables the planner's use of hashed aggregation plans. (bool)
+# TYPE postgresql_settings_enable_hashagg gauge
+postgresql_settings_enable_hashagg
+# HELP postgresql_settings_enable_hashjoin Enables the planner's use of hash join plans. (bool)
+# TYPE postgresql_settings_enable_hashjoin gauge
+postgresql_settings_enable_hashjoin
+# HELP postgresql_settings_enable_indexonlyscan Enables the planner's use of index-only-scan plans. (bool)
+# TYPE postgresql_settings_enable_indexonlyscan gauge
+postgresql_settings_enable_indexonlyscan
+# HELP postgresql_settings_enable_indexscan Enables the planner's use of index-scan plans. (bool)
+# TYPE postgresql_settings_enable_indexscan gauge
+postgresql_settings_enable_indexscan
+# HELP postgresql_settings_enable_material Enables the planner's use of materialization. (bool)
+# TYPE postgresql_settings_enable_material gauge
+postgresql_settings_enable_material
+# HELP postgresql_settings_enable_mergejoin Enables the planner's use of merge join plans. (bool)
+# TYPE postgresql_settings_enable_mergejoin gauge
+postgresql_settings_enable_mergejoin
+# HELP postgresql_settings_enable_nestloop Enables the planner's use of nested-loop join plans. (bool)
+# TYPE postgresql_settings_enable_nestloop gauge
+postgresql_settings_enable_nestloop
+# HELP postgresql_settings_enable_parallel_append Enables the planner's use of parallel append plans. (bool)
+# TYPE postgresql_settings_enable_parallel_append gauge
+postgresql_settings_enable_parallel_append
+# HELP postgresql_settings_enable_parallel_hash Enables the planner's use of parallel hash plans. (bool)
+# TYPE postgresql_settings_enable_parallel_hash gauge
+postgresql_settings_enable_parallel_hash
+# HELP postgresql_settings_enable_partition_pruning Enables plan-time and run-time partition pruning. (bool)
+# TYPE postgresql_settings_enable_partition_pruning gauge
+postgresql_settings_enable_partition_pruning
+# HELP postgresql_settings_enable_partitionwise_aggregate Enables partitionwise aggregation and grouping. (bool)
+# TYPE postgresql_settings_enable_partitionwise_aggregate gauge
+postgresql_settings_enable_partitionwise_aggregate
+# HELP postgresql_settings_enable_partitionwise_join Enables partitionwise join. (bool)
+# TYPE postgresql_settings_enable_partitionwise_join gauge
+postgresql_settings_enable_partitionwise_join
+# HELP postgresql_settings_enable_seqscan Enables the planner's use of sequential-scan plans. (bool)
+# TYPE postgresql_settings_enable_seqscan gauge
+postgresql_settings_enable_seqscan
+# HELP postgresql_settings_enable_sort Enables the planner's use of explicit sort steps. (bool)
+# TYPE postgresql_settings_enable_sort gauge
+postgresql_settings_enable_sort
+# HELP postgresql_settings_enable_tidscan Enables the planner's use of TID scan plans. (bool)
+# TYPE postgresql_settings_enable_tidscan gauge
+postgresql_settings_enable_tidscan
+# HELP postgresql_settings_escape_string_warning Warn about backslash escapes in ordinary string literals. (bool)
+# TYPE postgresql_settings_escape_string_warning gauge
+postgresql_settings_escape_string_warning
+# HELP postgresql_settings_exit_on_error Terminate session on any error. (bool)
+# TYPE postgresql_settings_exit_on_error gauge
+postgresql_settings_exit_on_error
+# HELP postgresql_settings_extra_float_digits Sets the number of digits displayed for floating-point values. min=-15 max=3
+# TYPE postgresql_settings_extra_float_digits gauge
+postgresql_settings_extra_float_digits
+# HELP postgresql_settings_from_collapse_limit Sets the FROM-list size beyond which subqueries are not collapsed. min=1 max=2147483647
+# TYPE postgresql_settings_from_collapse_limit gauge
+postgresql_settings_from_collapse_limit
+# HELP postgresql_settings_fsync Forces synchronization of updates to disk. (bool)
+# TYPE postgresql_settings_fsync gauge
+postgresql_settings_fsync
+# HELP postgresql_settings_full_page_writes Writes full pages to WAL when first modified after a checkpoint. (bool)
+# TYPE postgresql_settings_full_page_writes gauge
+postgresql_settings_full_page_writes
+# HELP postgresql_settings_geqo Enables genetic query optimization. (bool)
+# TYPE postgresql_settings_geqo gauge
+postgresql_settings_geqo
+# HELP postgresql_settings_geqo_effort GEQO: effort is used to set the default for other GEQO parameters. min=1 max=10
+# TYPE postgresql_settings_geqo_effort gauge
+postgresql_settings_geqo_effort
+# HELP postgresql_settings_geqo_generations GEQO: number of iterations of the algorithm. min=0 max=2147483647
+# TYPE postgresql_settings_geqo_generations gauge
+postgresql_settings_geqo_generations
+# HELP postgresql_settings_geqo_pool_size GEQO: number of individuals in the population. min=0 max=2147483647
+# TYPE postgresql_settings_geqo_pool_size gauge
+postgresql_settings_geqo_pool_size
+# HELP postgresql_settings_geqo_seed GEQO: seed for random path selection. min=0 max=1
+# TYPE postgresql_settings_geqo_seed gauge
+postgresql_settings_geqo_seed
+# HELP postgresql_settings_geqo_selection_bias GEQO: selective pressure within the population. min=1.5 max=2
+# TYPE postgresql_settings_geqo_selection_bias gauge
+postgresql_settings_geqo_selection_bias
+# HELP postgresql_settings_geqo_threshold Sets the threshold of FROM items beyond which GEQO is used. min=2 max=2147483647
+# TYPE postgresql_settings_geqo_threshold gauge
+postgresql_settings_geqo_threshold
+# HELP postgresql_settings_gin_fuzzy_search_limit Sets the maximum allowed result for exact search by GIN. min=0 max=2147483647
+# TYPE postgresql_settings_gin_fuzzy_search_limit gauge
+postgresql_settings_gin_fuzzy_search_limit
+# HELP postgresql_settings_gin_pending_list_limit Sets the maximum size of the pending list for GIN index. min=64 max=2147483647
+# TYPE postgresql_settings_gin_pending_list_limit gauge
+postgresql_settings_gin_pending_list_limit
+# HELP postgresql_settings_hot_standby Allows connections and queries during recovery. (bool)
+# TYPE postgresql_settings_hot_standby gauge
+postgresql_settings_hot_standby
+# HELP postgresql_settings_hot_standby_feedback Allows feedback from a hot standby to the primary that will avoid query conflicts. (bool)
+# TYPE postgresql_settings_hot_standby_feedback gauge
+postgresql_settings_hot_standby_feedback
+# HELP postgresql_settings_idle_in_transaction_session_timeout Sets the maximum allowed duration of any idling transaction. min=0 max=2147483647
+# TYPE postgresql_settings_idle_in_transaction_session_timeout gauge
+postgresql_settings_idle_in_transaction_session_timeout
+# HELP postgresql_settings_ignore_checksum_failure Continues processing after a checksum failure. (bool)
+# TYPE postgresql_settings_ignore_checksum_failure gauge
+postgresql_settings_ignore_checksum_failure
+# HELP postgresql_settings_ignore_system_indexes Disables reading from system indexes. (bool)
+# TYPE postgresql_settings_ignore_system_indexes gauge
+postgresql_settings_ignore_system_indexes
+# HELP postgresql_settings_integer_datetimes Datetimes are integer based. (bool)
+# TYPE postgresql_settings_integer_datetimes gauge
+postgresql_settings_integer_datetimes
+# HELP postgresql_settings_jit Allow JIT compilation. (bool)
+# TYPE postgresql_settings_jit gauge
+postgresql_settings_jit
+# HELP postgresql_settings_jit_above_cost Perform JIT compilation if query is more expensive. min=-1 max=1.79769e+308
+# TYPE postgresql_settings_jit_above_cost gauge
+postgresql_settings_jit_above_cost
+# HELP postgresql_settings_jit_debugging_support Register JIT compiled function with debugger. (bool)
+# TYPE postgresql_settings_jit_debugging_support gauge
+postgresql_settings_jit_debugging_support
+# HELP postgresql_settings_jit_dump_bitcode Write out LLVM bitcode to facilitate JIT debugging. (bool)
+# TYPE postgresql_settings_jit_dump_bitcode gauge
+postgresql_settings_jit_dump_bitcode
+# HELP postgresql_settings_jit_expressions Allow JIT compilation of expressions. (bool)
+# TYPE postgresql_settings_jit_expressions gauge
+postgresql_settings_jit_expressions
+# HELP postgresql_settings_jit_inline_above_cost Perform JIT inlining if query is more expensive. min=-1 max=1.79769e+308
+# TYPE postgresql_settings_jit_inline_above_cost gauge
+postgresql_settings_jit_inline_above_cost
+# HELP postgresql_settings_jit_optimize_above_cost Optimize JITed functions if query is more expensive. min=-1 max=1.79769e+308
+# TYPE postgresql_settings_jit_optimize_above_cost gauge
+postgresql_settings_jit_optimize_above_cost
+# HELP postgresql_settings_jit_profiling_support Register JIT compiled function with perf profiler. (bool)
+# TYPE postgresql_settings_jit_profiling_support gauge
+postgresql_settings_jit_profiling_support
+# HELP postgresql_settings_jit_tuple_deforming Allow JIT compilation of tuple deforming. (bool)
+# TYPE postgresql_settings_jit_tuple_deforming gauge
+postgresql_settings_jit_tuple_deforming
+# HELP postgresql_settings_join_collapse_limit Sets the FROM-list size beyond which JOIN constructs are not flattened. min=1 max=2147483647
+# TYPE postgresql_settings_join_collapse_limit gauge
+postgresql_settings_join_collapse_limit
+# HELP postgresql_settings_krb_caseins_users Sets whether Kerberos and GSSAPI user names should be treated as case-insensitive. (bool)
+# TYPE postgresql_settings_krb_caseins_users gauge
+postgresql_settings_krb_caseins_users
+# HELP postgresql_settings_lo_compat_privileges Enables backward compatibility mode for privilege checks on large objects. (bool)
+# TYPE postgresql_settings_lo_compat_privileges gauge
+postgresql_settings_lo_compat_privileges
+# HELP postgresql_settings_lock_timeout Sets the maximum allowed duration of any wait for a lock. min=0 max=2147483647
+# TYPE postgresql_settings_lock_timeout gauge
+postgresql_settings_lock_timeout
+# HELP postgresql_settings_log_autovacuum_min_duration Sets the minimum execution time above which autovacuum actions will be logged. min=-1 max=2147483647
+# TYPE postgresql_settings_log_autovacuum_min_duration gauge
+postgresql_settings_log_autovacuum_min_duration
+# HELP postgresql_settings_log_checkpoints Logs each checkpoint. (bool)
+# TYPE postgresql_settings_log_checkpoints gauge
+postgresql_settings_log_checkpoints
+# HELP postgresql_settings_log_connections Logs each successful connection. (bool)
+# TYPE postgresql_settings_log_connections gauge
+postgresql_settings_log_connections
+# HELP postgresql_settings_log_disconnections Logs end of a session, including duration. (bool)
+# TYPE postgresql_settings_log_disconnections gauge
+postgresql_settings_log_disconnections
+# HELP postgresql_settings_log_duration Logs the duration of each completed SQL statement. (bool)
+# TYPE postgresql_settings_log_duration gauge
+postgresql_settings_log_duration
+# HELP postgresql_settings_log_executor_stats Writes executor performance statistics to the server log. (bool)
+# TYPE postgresql_settings_log_executor_stats gauge
+postgresql_settings_log_executor_stats
+# HELP postgresql_settings_log_file_mode Sets the file permissions for log files. min=0 max=511
+# TYPE postgresql_settings_log_file_mode gauge
+postgresql_settings_log_file_mode
+# HELP postgresql_settings_log_hostname Logs the host name in the connection logs. (bool)
+# TYPE postgresql_settings_log_hostname gauge
+postgresql_settings_log_hostname
+# HELP postgresql_settings_log_lock_waits Logs long lock waits. (bool)
+# TYPE postgresql_settings_log_lock_waits gauge
+postgresql_settings_log_lock_waits
+# HELP postgresql_settings_log_min_duration_statement Sets the minimum execution time above which statements will be logged. min=-1 max=2147483647
+# TYPE postgresql_settings_log_min_duration_statement gauge
+postgresql_settings_log_min_duration_statement
+# HELP postgresql_settings_log_parser_stats Writes parser performance statistics to the server log. (bool)
+# TYPE postgresql_settings_log_parser_stats gauge
+postgresql_settings_log_parser_stats
+# HELP postgresql_settings_log_planner_stats Writes planner performance statistics to the server log. (bool)
+# TYPE postgresql_settings_log_planner_stats gauge
+postgresql_settings_log_planner_stats
+# HELP postgresql_settings_log_replication_commands Logs each replication command. (bool)
+# TYPE postgresql_settings_log_replication_commands gauge
+postgresql_settings_log_replication_commands
+# HELP postgresql_settings_log_rotation_age Automatic log file rotation will occur after N minutes. min=0 max=35791394
+# TYPE postgresql_settings_log_rotation_age gauge
+postgresql_settings_log_rotation_age
+# HELP postgresql_settings_log_rotation_size Automatic log file rotation will occur after N kilobytes. min=0 max=2097151
+# TYPE postgresql_settings_log_rotation_size gauge
+postgresql_settings_log_rotation_size
+# HELP postgresql_settings_log_statement_stats Writes cumulative performance statistics to the server log. (bool)
+# TYPE postgresql_settings_log_statement_stats gauge
+postgresql_settings_log_statement_stats
+# HELP postgresql_settings_log_temp_files Log the use of temporary files larger than this number of kilobytes. min=-1 max=2147483647
+# TYPE postgresql_settings_log_temp_files gauge
+postgresql_settings_log_temp_files
+# HELP postgresql_settings_log_transaction_sample_rate Set the fraction of transactions to log for new transactions. min=0 max=1
+# TYPE postgresql_settings_log_transaction_sample_rate gauge
+postgresql_settings_log_transaction_sample_rate
+# HELP postgresql_settings_log_truncate_on_rotation Truncate existing log files of same name during log rotation. (bool)
+# TYPE postgresql_settings_log_truncate_on_rotation gauge
+postgresql_settings_log_truncate_on_rotation
+# HELP postgresql_settings_logging_collector Start a subprocess to capture stderr output and/or csvlogs into log files. (bool)
+# TYPE postgresql_settings_logging_collector gauge
+postgresql_settings_logging_collector
+# HELP postgresql_settings_maintenance_work_mem Sets the maximum memory to be used for maintenance operations. min=1024 max=2147483647
+# TYPE postgresql_settings_maintenance_work_mem gauge
+postgresql_settings_maintenance_work_mem
+# HELP postgresql_settings_max_connections Sets the maximum number of concurrent connections. min=1 max=262143
+# TYPE postgresql_settings_max_connections gauge
+postgresql_settings_max_connections
+# HELP postgresql_settings_max_files_per_process Sets the maximum number of simultaneously open files for each server process. min=25 max=2147483647
+# TYPE postgresql_settings_max_files_per_process gauge
+postgresql_settings_max_files_per_process
+# HELP postgresql_settings_max_function_args Shows the maximum number of function arguments. min=100 max=100
+# TYPE postgresql_settings_max_function_args gauge
+postgresql_settings_max_function_args
+# HELP postgresql_settings_max_identifier_length Shows the maximum identifier length. min=63 max=63
+# TYPE postgresql_settings_max_identifier_length gauge
+postgresql_settings_max_identifier_length
+# HELP postgresql_settings_max_index_keys Shows the maximum number of index keys. min=32 max=32
+# TYPE postgresql_settings_max_index_keys gauge
+postgresql_settings_max_index_keys
+# HELP postgresql_settings_max_locks_per_transaction Sets the maximum number of locks per transaction. min=10 max=2147483647
+# TYPE postgresql_settings_max_locks_per_transaction gauge
+postgresql_settings_max_locks_per_transaction
+# HELP postgresql_settings_max_logical_replication_workers Maximum number of logical replication worker processes. min=0 max=262143
+# TYPE postgresql_settings_max_logical_replication_workers gauge
+postgresql_settings_max_logical_replication_workers
+# HELP postgresql_settings_max_parallel_maintenance_workers Sets the maximum number of parallel processes per maintenance operation. min=0 max=1024
+# TYPE postgresql_settings_max_parallel_maintenance_workers gauge
+postgresql_settings_max_parallel_maintenance_workers
+# HELP postgresql_settings_max_parallel_workers Sets the maximum number of parallel workers that can be active at one time. min=0 max=1024
+# TYPE postgresql_settings_max_parallel_workers gauge
+postgresql_settings_max_parallel_workers
+# HELP postgresql_settings_max_parallel_workers_per_gather Sets the maximum number of parallel processes per executor node. min=0 max=1024
+# TYPE postgresql_settings_max_parallel_workers_per_gather gauge
+postgresql_settings_max_parallel_workers_per_gather
+# HELP postgresql_settings_max_pred_locks_per_page Sets the maximum number of predicate-locked tuples per page. min=0 max=2147483647
+# TYPE postgresql_settings_max_pred_locks_per_page gauge
+postgresql_settings_max_pred_locks_per_page
+# HELP postgresql_settings_max_pred_locks_per_relation Sets the maximum number of predicate-locked pages and tuples per relation. min=-2147483648 max=2147483647
+# TYPE postgresql_settings_max_pred_locks_per_relation gauge
+postgresql_settings_max_pred_locks_per_relation
+# HELP postgresql_settings_max_pred_locks_per_transaction Sets the maximum number of predicate locks per transaction. min=10 max=2147483647
+# TYPE postgresql_settings_max_pred_locks_per_transaction gauge
+postgresql_settings_max_pred_locks_per_transaction
+# HELP postgresql_settings_max_prepared_transactions Sets the maximum number of simultaneously prepared transactions. min=0 max=262143
+# TYPE postgresql_settings_max_prepared_transactions gauge
+postgresql_settings_max_prepared_transactions
+# HELP postgresql_settings_max_replication_slots Sets the maximum number of simultaneously defined replication slots. min=0 max=262143
+# TYPE postgresql_settings_max_replication_slots gauge
+postgresql_settings_max_replication_slots
+# HELP postgresql_settings_max_stack_depth Sets the maximum stack depth, in kilobytes. min=100 max=2147483647
+# TYPE postgresql_settings_max_stack_depth gauge
+postgresql_settings_max_stack_depth
+# HELP postgresql_settings_max_standby_archive_delay Sets the maximum delay before canceling queries when a hot standby server is processing archived WAL data. min=-1 max=2147483647
+# TYPE postgresql_settings_max_standby_archive_delay gauge
+postgresql_settings_max_standby_archive_delay
+# HELP postgresql_settings_max_standby_streaming_delay Sets the maximum delay before canceling queries when a hot standby server is processing streamed WAL data. min=-1 max=2147483647
+# TYPE postgresql_settings_max_standby_streaming_delay gauge
+postgresql_settings_max_standby_streaming_delay
+# HELP postgresql_settings_max_sync_workers_per_subscription Maximum number of table synchronization workers per subscription. min=0 max=262143
+# TYPE postgresql_settings_max_sync_workers_per_subscription gauge
+postgresql_settings_max_sync_workers_per_subscription
+# HELP postgresql_settings_max_wal_senders Sets the maximum number of simultaneously running WAL sender processes. min=0 max=262143
+# TYPE postgresql_settings_max_wal_senders gauge
+postgresql_settings_max_wal_senders
+# HELP postgresql_settings_max_wal_size Sets the WAL size that triggers a checkpoint. min=2 max=2147483647
+# TYPE postgresql_settings_max_wal_size gauge
+postgresql_settings_max_wal_size
+# HELP postgresql_settings_max_worker_processes Maximum number of concurrent worker processes. min=0 max=262143
+# TYPE postgresql_settings_max_worker_processes gauge
+postgresql_settings_max_worker_processes
+# HELP postgresql_settings_min_parallel_index_scan_size Sets the minimum amount of index data for a parallel scan. min=0 max=715827882
+# TYPE postgresql_settings_min_parallel_index_scan_size gauge
+postgresql_settings_min_parallel_index_scan_size
+# HELP postgresql_settings_min_parallel_table_scan_size Sets the minimum amount of table data for a parallel scan. min=0 max=715827882
+# TYPE postgresql_settings_min_parallel_table_scan_size gauge
+postgresql_settings_min_parallel_table_scan_size
+# HELP postgresql_settings_min_wal_size Sets the minimum size to shrink the WAL to. min=2 max=2147483647
+# TYPE postgresql_settings_min_wal_size gauge
+postgresql_settings_min_wal_size
+# HELP postgresql_settings_old_snapshot_threshold Time before a snapshot is too old to read pages changed after the snapshot was taken. min=-1 max=86400
+# TYPE postgresql_settings_old_snapshot_threshold gauge
+postgresql_settings_old_snapshot_threshold
+# HELP postgresql_settings_operator_precedence_warning Emit a warning for constructs that changed meaning since PostgreSQL 9.4. (bool)
+# TYPE postgresql_settings_operator_precedence_warning gauge
+postgresql_settings_operator_precedence_warning
+# HELP postgresql_settings_parallel_leader_participation Controls whether Gather and Gather Merge also run subplans. (bool)
+# TYPE postgresql_settings_parallel_leader_participation gauge
+postgresql_settings_parallel_leader_participation
+# HELP postgresql_settings_parallel_setup_cost Sets the planner's estimate of the cost of starting up worker processes for parallel query. min=0 max=1.79769e+308
+# TYPE postgresql_settings_parallel_setup_cost gauge
+postgresql_settings_parallel_setup_cost
+# HELP postgresql_settings_parallel_tuple_cost Sets the planner's estimate of the cost of passing each tuple (row) from worker to master backend. min=0 max=1.79769e+308
+# TYPE postgresql_settings_parallel_tuple_cost gauge
+postgresql_settings_parallel_tuple_cost
+# HELP postgresql_settings_port Sets the TCP port the server listens on. min=1 max=65535
+# TYPE postgresql_settings_port gauge
+postgresql_settings_port
+# HELP postgresql_settings_post_auth_delay Waits N seconds on connection startup after authentication. min=0 max=2147
+# TYPE postgresql_settings_post_auth_delay gauge
+postgresql_settings_post_auth_delay
+# HELP postgresql_settings_pre_auth_delay Waits N seconds on connection startup before authentication. min=0 max=60
+# TYPE postgresql_settings_pre_auth_delay gauge
+postgresql_settings_pre_auth_delay
+# HELP postgresql_settings_quote_all_identifiers When generating SQL fragments, quote all identifiers. (bool)
+# TYPE postgresql_settings_quote_all_identifiers gauge
+postgresql_settings_quote_all_identifiers
+# HELP postgresql_settings_random_page_cost Sets the planner's estimate of the cost of a nonsequentially fetched disk page. min=0 max=1.79769e+308
+# TYPE postgresql_settings_random_page_cost gauge
+postgresql_settings_random_page_cost
+# HELP postgresql_settings_recovery_min_apply_delay Sets the minimum delay for applying changes during recovery. min=0 max=2147483647
+# TYPE postgresql_settings_recovery_min_apply_delay gauge
+postgresql_settings_recovery_min_apply_delay
+# HELP postgresql_settings_recovery_target_inclusive Sets whether to include or exclude transaction with recovery target. (bool)
+# TYPE postgresql_settings_recovery_target_inclusive gauge
+postgresql_settings_recovery_target_inclusive
+# HELP postgresql_settings_restart_after_crash Reinitialize server after backend crash. (bool)
+# TYPE postgresql_settings_restart_after_crash gauge
+postgresql_settings_restart_after_crash
+# HELP postgresql_settings_row_security Enable row security. (bool)
+# TYPE postgresql_settings_row_security gauge
+postgresql_settings_row_security
+# HELP postgresql_settings_segment_size Shows the number of pages per disk file. min=131072 max=131072
+# TYPE postgresql_settings_segment_size gauge
+postgresql_settings_segment_size
+# HELP postgresql_settings_seq_page_cost Sets the planner's estimate of the cost of a sequentially fetched disk page. min=0 max=1.79769e+308
+# TYPE postgresql_settings_seq_page_cost gauge
+postgresql_settings_seq_page_cost
+# HELP postgresql_settings_server_version_num Shows the server version as an integer. min=120011 max=120011
+# TYPE postgresql_settings_server_version_num gauge
+postgresql_settings_server_version_num
+# HELP postgresql_settings_shared_buffers Sets the number of shared memory buffers used by the server. min=16 max=1073741823
+# TYPE postgresql_settings_shared_buffers gauge
+postgresql_settings_shared_buffers
+# HELP postgresql_settings_ssl Enables SSL connections. (bool)
+# TYPE postgresql_settings_ssl gauge
+postgresql_settings_ssl
+# HELP postgresql_settings_ssl_passphrase_command_supports_reload Also use ssl_passphrase_command during server reload. (bool)
+# TYPE postgresql_settings_ssl_passphrase_command_supports_reload gauge
+postgresql_settings_ssl_passphrase_command_supports_reload
+# HELP postgresql_settings_ssl_prefer_server_ciphers Give priority to server ciphersuite order. (bool)
+# TYPE postgresql_settings_ssl_prefer_server_ciphers gauge
+postgresql_settings_ssl_prefer_server_ciphers
+# HELP postgresql_settings_standard_conforming_strings Causes '...' strings to treat backslashes literally. (bool)
+# TYPE postgresql_settings_standard_conforming_strings gauge
+postgresql_settings_standard_conforming_strings
+# HELP postgresql_settings_statement_timeout Sets the maximum allowed duration of any statement. min=0 max=2147483647
+# TYPE postgresql_settings_statement_timeout gauge
+postgresql_settings_statement_timeout
+# HELP postgresql_settings_superuser_reserved_connections Sets the number of connection slots reserved for superusers. min=0 max=262143
+# TYPE postgresql_settings_superuser_reserved_connections gauge
+postgresql_settings_superuser_reserved_connections
+# HELP postgresql_settings_synchronize_seqscans Enable synchronized sequential scans. (bool)
+# TYPE postgresql_settings_synchronize_seqscans gauge
+postgresql_settings_synchronize_seqscans
+# HELP postgresql_settings_syslog_sequence_numbers Add sequence number to syslog messages to avoid duplicate suppression. (bool)
+# TYPE postgresql_settings_syslog_sequence_numbers gauge
+postgresql_settings_syslog_sequence_numbers
+# HELP postgresql_settings_syslog_split_messages Split messages sent to syslog by lines and to fit into 1024 bytes. (bool)
+# TYPE postgresql_settings_syslog_split_messages gauge
+postgresql_settings_syslog_split_messages
+# HELP postgresql_settings_tcp_keepalives_count Maximum number of TCP keepalive retransmits. min=0 max=2147483647
+# TYPE postgresql_settings_tcp_keepalives_count gauge
+postgresql_settings_tcp_keepalives_count
+# HELP postgresql_settings_tcp_keepalives_idle Time between issuing TCP keepalives. min=0 max=2147483647
+# TYPE postgresql_settings_tcp_keepalives_idle gauge
+postgresql_settings_tcp_keepalives_idle
+# HELP postgresql_settings_tcp_keepalives_interval Time between TCP keepalive retransmits. min=0 max=2147483647
+# TYPE postgresql_settings_tcp_keepalives_interval gauge
+postgresql_settings_tcp_keepalives_interval
+# HELP postgresql_settings_tcp_user_timeout TCP user timeout. min=0 max=2147483647
+# TYPE postgresql_settings_tcp_user_timeout gauge
+postgresql_settings_tcp_user_timeout
+# HELP postgresql_settings_temp_buffers Sets the maximum number of temporary buffers used by each session. min=100 max=1073741823
+# TYPE postgresql_settings_temp_buffers gauge
+postgresql_settings_temp_buffers
+# HELP postgresql_settings_temp_file_limit Limits the total size of all temporary files used by each process. min=-1 max=2147483647
+# TYPE postgresql_settings_temp_file_limit gauge
+postgresql_settings_temp_file_limit
+# HELP postgresql_settings_trace_notify Generates debugging output for LISTEN and NOTIFY. (bool)
+# TYPE postgresql_settings_trace_notify gauge
+postgresql_settings_trace_notify
+# HELP postgresql_settings_trace_sort Emit information about resource usage in sorting. (bool)
+# TYPE postgresql_settings_trace_sort gauge
+postgresql_settings_trace_sort
+# HELP postgresql_settings_track_activities Collects information about executing commands. (bool)
+# TYPE postgresql_settings_track_activities gauge
+postgresql_settings_track_activities
+# HELP postgresql_settings_track_activity_query_size Sets the size reserved for pg_stat_activity.query, in bytes. min=100 max=102400
+# TYPE postgresql_settings_track_activity_query_size gauge
+postgresql_settings_track_activity_query_size
+# HELP postgresql_settings_track_commit_timestamp Collects transaction commit time. (bool)
+# TYPE postgresql_settings_track_commit_timestamp gauge
+postgresql_settings_track_commit_timestamp
+# HELP postgresql_settings_track_counts Collects statistics on database activity. (bool)
+# TYPE postgresql_settings_track_counts gauge
+postgresql_settings_track_counts
+# HELP postgresql_settings_track_io_timing Collects timing statistics for database I/O activity. (bool)
+# TYPE postgresql_settings_track_io_timing gauge
+postgresql_settings_track_io_timing
+# HELP postgresql_settings_transaction_deferrable Whether to defer a read-only serializable transaction until it can be executed with no possible serialization failures. (bool)
+# TYPE postgresql_settings_transaction_deferrable gauge
+postgresql_settings_transaction_deferrable
+# HELP postgresql_settings_transaction_read_only Sets the current transaction's read-only status. (bool)
+# TYPE postgresql_settings_transaction_read_only gauge
+postgresql_settings_transaction_read_only
+# HELP postgresql_settings_transform_null_equals Treats "expr=NULL" as "expr IS NULL". (bool)
+# TYPE postgresql_settings_transform_null_equals gauge
+postgresql_settings_transform_null_equals
+# HELP postgresql_settings_unix_socket_permissions Sets the access permissions of the Unix-domain socket. min=0 max=511
+# TYPE postgresql_settings_unix_socket_permissions gauge
+postgresql_settings_unix_socket_permissions
+# HELP postgresql_settings_update_process_title Updates the process title to show the active SQL command. (bool)
+# TYPE postgresql_settings_update_process_title gauge
+postgresql_settings_update_process_title
+# HELP postgresql_settings_vacuum_cleanup_index_scale_factor Number of tuple inserts prior to index cleanup as a fraction of reltuples. min=0 max=1e+10
+# TYPE postgresql_settings_vacuum_cleanup_index_scale_factor gauge
+postgresql_settings_vacuum_cleanup_index_scale_factor
+# HELP postgresql_settings_vacuum_cost_delay Vacuum cost delay in milliseconds. min=0 max=100
+# TYPE postgresql_settings_vacuum_cost_delay gauge
+postgresql_settings_vacuum_cost_delay
+# HELP postgresql_settings_vacuum_cost_limit Vacuum cost amount available before napping. min=1 max=10000
+# TYPE postgresql_settings_vacuum_cost_limit gauge
+postgresql_settings_vacuum_cost_limit
+# HELP postgresql_settings_vacuum_cost_page_dirty Vacuum cost for a page dirtied by vacuum. min=0 max=10000
+# TYPE postgresql_settings_vacuum_cost_page_dirty gauge
+postgresql_settings_vacuum_cost_page_dirty
+# HELP postgresql_settings_vacuum_cost_page_hit Vacuum cost for a page found in the buffer cache. min=0 max=10000
+# TYPE postgresql_settings_vacuum_cost_page_hit gauge
+postgresql_settings_vacuum_cost_page_hit
+# HELP postgresql_settings_vacuum_cost_page_miss Vacuum cost for a page not found in the buffer cache. min=0 max=10000
+# TYPE postgresql_settings_vacuum_cost_page_miss gauge
+postgresql_settings_vacuum_cost_page_miss
+# HELP postgresql_settings_vacuum_defer_cleanup_age Number of transactions by which VACUUM and HOT cleanup should be deferred, if any. min=0 max=1000000
+# TYPE postgresql_settings_vacuum_defer_cleanup_age gauge
+postgresql_settings_vacuum_defer_cleanup_age
+# HELP postgresql_settings_vacuum_freeze_min_age Minimum age at which VACUUM should freeze a table row. min=0 max=1000000000
+# TYPE postgresql_settings_vacuum_freeze_min_age gauge
+postgresql_settings_vacuum_freeze_min_age
+# HELP postgresql_settings_vacuum_freeze_table_age Age at which VACUUM should scan whole table to freeze tuples. min=0 max=2000000000
+# TYPE postgresql_settings_vacuum_freeze_table_age gauge
+postgresql_settings_vacuum_freeze_table_age
+# HELP postgresql_settings_vacuum_multixact_freeze_min_age Minimum age at which VACUUM should freeze a MultiXactId in a table row. min=0 max=1000000000
+# TYPE postgresql_settings_vacuum_multixact_freeze_min_age gauge
+postgresql_settings_vacuum_multixact_freeze_min_age
+# HELP postgresql_settings_vacuum_multixact_freeze_table_age Multixact age at which VACUUM should scan whole table to freeze tuples. min=0 max=2000000000
+# TYPE postgresql_settings_vacuum_multixact_freeze_table_age gauge
+postgresql_settings_vacuum_multixact_freeze_table_age
+# HELP postgresql_settings_wal_block_size Shows the block size in the write ahead log. min=8192 max=8192
+# TYPE postgresql_settings_wal_block_size gauge
+postgresql_settings_wal_block_size
+# HELP postgresql_settings_wal_buffers Sets the number of disk-page buffers in shared memory for WAL. min=-1 max=262143
+# TYPE postgresql_settings_wal_buffers gauge
+postgresql_settings_wal_buffers
+# HELP postgresql_settings_wal_compression Compresses full-page writes written in WAL file. (bool)
+# TYPE postgresql_settings_wal_compression gauge
+postgresql_settings_wal_compression
+# HELP postgresql_settings_wal_init_zero Writes zeroes to new WAL files before first use. (bool)
+# TYPE postgresql_settings_wal_init_zero gauge
+postgresql_settings_wal_init_zero
+# HELP postgresql_settings_wal_keep_segments Sets the number of WAL files held for standby servers. min=0 max=2147483647
+# TYPE postgresql_settings_wal_keep_segments gauge
+postgresql_settings_wal_keep_segments
+# HELP postgresql_settings_wal_log_hints Writes full pages to WAL when first modified after a checkpoint, even for a non-critical modification. (bool)
+# TYPE postgresql_settings_wal_log_hints gauge
+postgresql_settings_wal_log_hints
+# HELP postgresql_settings_wal_receiver_status_interval Sets the maximum interval between WAL receiver status reports to the sending server. min=0 max=2147483
+# TYPE postgresql_settings_wal_receiver_status_interval gauge
+postgresql_settings_wal_receiver_status_interval
+# HELP postgresql_settings_wal_receiver_timeout Sets the maximum wait time to receive data from the sending server. min=0 max=2147483647
+# TYPE postgresql_settings_wal_receiver_timeout gauge
+postgresql_settings_wal_receiver_timeout
+# HELP postgresql_settings_wal_recycle Recycles WAL files by renaming them. (bool)
+# TYPE postgresql_settings_wal_recycle gauge
+postgresql_settings_wal_recycle
+# HELP postgresql_settings_wal_retrieve_retry_interval Sets the time to wait before retrying to retrieve WAL after a failed attempt. min=1 max=2147483647
+# TYPE postgresql_settings_wal_retrieve_retry_interval gauge
+postgresql_settings_wal_retrieve_retry_interval
+# HELP postgresql_settings_wal_segment_size Shows the size of write ahead log segments. min=1048576 max=1073741824
+# TYPE postgresql_settings_wal_segment_size gauge
+postgresql_settings_wal_segment_size
+# HELP postgresql_settings_wal_sender_timeout Sets the maximum time to wait for WAL replication. min=0 max=2147483647
+# TYPE postgresql_settings_wal_sender_timeout gauge
+postgresql_settings_wal_sender_timeout
+# HELP postgresql_settings_wal_writer_delay Time between WAL flushes performed in the WAL writer. min=1 max=10000
+# TYPE postgresql_settings_wal_writer_delay gauge
+postgresql_settings_wal_writer_delay
+# HELP postgresql_settings_wal_writer_flush_after Amount of WAL written out by WAL writer that triggers a flush. min=0 max=2147483647
+# TYPE postgresql_settings_wal_writer_flush_after gauge
+postgresql_settings_wal_writer_flush_after
+# HELP postgresql_settings_work_mem Sets the maximum memory to be used for query workspaces. min=64 max=2147483647
+# TYPE postgresql_settings_work_mem gauge
+postgresql_settings_work_mem
+# HELP postgresql_settings_zero_damaged_pages Continues processing past damaged page headers. (bool)
+# TYPE postgresql_settings_zero_damaged_pages gauge
+postgresql_settings_zero_damaged_pages
+# HELP postgresql_up Whether the PostgreSQL server is up.
+# TYPE postgresql_up gauge
+postgresql_up
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"}
+promhttp_metric_handler_requests_total{code="500"}
+promhttp_metric_handler_requests_total{code="503"}
