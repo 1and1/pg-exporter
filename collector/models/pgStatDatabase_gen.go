@@ -140,7 +140,7 @@ func (r *PgStatDatabase) ToMetrics(namespace string, subsystem string, ch chan<-
 	)
 
 	// checksum_failures_count (CounterValue)
-	checksumFailuresCount := float64(r.checksumFailures)
+	checksumFailuresCount := float64(r.ChecksumFailures)
 	ch <- prometheus.MustNewConstMetric(
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, `checksum_failures_count`), `Number of data page checksum failures detected in this database`, nil, labels,
@@ -149,10 +149,10 @@ func (r *PgStatDatabase) ToMetrics(namespace string, subsystem string, ch chan<-
 
 	// checksum_last_failure (CounterValue)
 	var checksumLastFailure float64
-	if r.checksumLastFailure.IsZero() {
+	if r.ChecksumLastFailure.IsZero() {
 		checksumLastFailure = float64(0)
 	} else {
-		checksumLastFailure = float64(r.checksumLastFailure.Unix())
+		checksumLastFailure = float64(r.ChecksumLastFailure.Unix())
 	}
 	ch <- prometheus.MustNewConstMetric(
 		prometheus.NewDesc(
@@ -177,7 +177,7 @@ func (r *PgStatDatabase) ToMetrics(namespace string, subsystem string, ch chan<-
 	)
 
 	// session_time_total (CounterValue)
-	sessionTimeTotal := r.sessionTime.Seconds()
+	sessionTimeTotal := r.SessionTime.Seconds()
 	ch <- prometheus.MustNewConstMetric(
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, `session_time_total`), `Time spent by database sessions in this database, in milliseconds`, nil, labels,
@@ -185,7 +185,7 @@ func (r *PgStatDatabase) ToMetrics(namespace string, subsystem string, ch chan<-
 	)
 
 	// active_time_total (CounterValue)
-	activeTimeTotal := r.activeTime.Seconds()
+	activeTimeTotal := r.ActiveTime.Seconds()
 	ch <- prometheus.MustNewConstMetric(
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, `active_time_total`), `Time spent executing SQL statements in this database, in milliseconds`, nil, labels,
@@ -193,7 +193,7 @@ func (r *PgStatDatabase) ToMetrics(namespace string, subsystem string, ch chan<-
 	)
 
 	// idle_in_transaction_time_total (CounterValue)
-	idleInTransactionTimeTotal := r.idleInTransactionTime.Seconds()
+	idleInTransactionTimeTotal := r.IdleInTransactionTime.Seconds()
 	ch <- prometheus.MustNewConstMetric(
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, `idle_in_transaction_time_total`), `Time spent idling while in a transaction in this database, in milliseconds`, nil, labels,
@@ -201,7 +201,7 @@ func (r *PgStatDatabase) ToMetrics(namespace string, subsystem string, ch chan<-
 	)
 
 	// sessions_count (CounterValue)
-	sessionsCount := float64(r.sessions)
+	sessionsCount := float64(r.Sessions)
 	ch <- prometheus.MustNewConstMetric(
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, `sessions_count`), `Total number of sessions established to this database`, nil, labels,
@@ -209,7 +209,7 @@ func (r *PgStatDatabase) ToMetrics(namespace string, subsystem string, ch chan<-
 	)
 
 	// sessions_abandoned_count (CounterValue)
-	sessionsAbandonedCount := float64(r.sessionsAbandoned)
+	sessionsAbandonedCount := float64(r.SessionsAbandoned)
 	ch <- prometheus.MustNewConstMetric(
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, `sessions_abandoned_count`), `Number of database sessions to this database that were terminated because connection to the client was lost`, nil, labels,
@@ -217,7 +217,7 @@ func (r *PgStatDatabase) ToMetrics(namespace string, subsystem string, ch chan<-
 	)
 
 	// sessions_fatal_count (CounterValue)
-	sessionsFatalCount := float64(r.sessionsFatal)
+	sessionsFatalCount := float64(r.SessionsFatal)
 	ch <- prometheus.MustNewConstMetric(
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, `sessions_fatal_count`), `Number of database sessions to this database that were terminated by fatal errors`, nil, labels,
@@ -225,7 +225,7 @@ func (r *PgStatDatabase) ToMetrics(namespace string, subsystem string, ch chan<-
 	)
 
 	// sessions_killed_count (CounterValue)
-	sessionsKilledCount := float64(r.sessionsKilled)
+	sessionsKilledCount := float64(r.SessionsKilled)
 	ch <- prometheus.MustNewConstMetric(
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, `sessions_killed_count`), `Number of database sessions to this database that were terminated by operator intervention`, nil, labels,

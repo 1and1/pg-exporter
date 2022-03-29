@@ -2,6 +2,7 @@ package collector
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
@@ -39,12 +40,25 @@ func (ScrapeDatabase) Type() ScrapeType {
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
 func (ScrapeDatabase) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.Metric) error {
-	var statDatabase models.PgStatDatabaseSlice
-	if err := db.ModelContext(ctx, &statDatabase).Where("datname IN (?)", pg.In(collectDatabases)).
-		Select(); err != nil {
-		return err
+	// we create a query based on the given commandline flags
+	columns := "numbackends, xact_commit, xact_rollback, blks_read, blks_hit, tup_returned, tup_fetched, tup_inserted, tup_updated, tup_deleted, conflicts, temp_files, temp_bytes, deadlocks, blk_read_time, blk_write_time"
+
+	if pgversion >= 120000 {
+		columns += ", checksum_failures, checksum_last_failure"
 	}
 
+	if pgversion >= 140000 {
+		columns += ", session_time, active_time, idle_in_transaction_time, sessions, sessions_abandoned, sessions_fatal, sessions_killed"
+	}
+
+	qs := fmt.Sprintf(`SELECT datid, datname, %s, stats_reset FROM pg_stat_database`+
+		` WHERE datname IN (?)`,
+		columns)
+
+	var statDatabase models.PgStatDatabaseSlice
+	if _, err := db.QueryContext(ctx, &statDatabase, qs, pg.In(collectDatabases)); err != nil {
+		return err
+	}
 	if err := statDatabase.ToMetrics(namespace, statdatabase, ch); err != nil {
 		return err
 	}
