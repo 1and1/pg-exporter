@@ -16,15 +16,15 @@ const (
 )
 
 type pgSetting struct {
-	tableName struct{} `sql:"pg_settings"`
-	Name      string   `sql:"name"`
-	Setting   string   `sql:"setting"`
-	ShortDesc string   `sql:"short_desc"`
-	Unit      string   `sql:"unit"`
-	Vartype   string   `sql:"vartype"`
-	MinVal    string   `sql:"min_val"`
-	MaxVal    string   `sql:"max_val"`
-	Enumvals  []string `sql:"enumvals,array"`
+	tableName struct{} `pg:"pg_settings"`
+	Name      string   `pg:"name"`
+	Setting   string   `pg:"setting"`
+	ShortDesc string   `pg:"short_desc"`
+	Unit      string   `pg:"unit"`
+	Vartype   string   `pg:"vartype"`
+	MinVal    string   `pg:"min_val"`
+	MaxVal    string   `pg:"max_val"`
+	Enumvals  []string `pg:"enumvals,array"`
 }
 
 // ScrapeSettings scrapes from pg_settings
@@ -89,38 +89,41 @@ func (ScrapeSettings) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheu
 			value = realValue
 		}
 
-		// get the pre/suffix if any from the value
+		// get the pre/suffix if any from the value unless it's negative
 
 		unitCaptures := unitRE.FindStringSubmatch(setting.Unit)
 
-		// check if we have an unit type
-		switch unitCaptures[2] {
-		case "min":
-			// convert minute to seconds
-			value = value * 60
-		case "ms":
-			// convert milliseconds to seconds
-			value = value / 1000
-		case "kB":
-			// convert kilobytes to bytes
-			value = value * 1024
-		case "MB":
-			// convert megabytes to bytes
-			value = value * 1024 * 1024
-		}
-		if unitCaptures[1] != "" {
-			multiplicator, err := strconv.Atoi(unitCaptures[1])
-			if err != nil {
-				return err
+		if value >= 0 {
+			// check if we have an unit type
+			switch unitCaptures[2] {
+			case "min":
+				// convert minute to seconds
+				value = value * 60
+			case "ms":
+				// convert milliseconds to seconds
+				value = value / 1000
+			case "kB":
+				// convert kilobytes to bytes
+				value = value * 1024
+			case "MB":
+				// convert megabytes to bytes
+				value = value * 1024 * 1024
 			}
-			value = value * float64(multiplicator)
+			if unitCaptures[1] != "" {
+				multiplicator, err := strconv.Atoi(unitCaptures[1])
+				if err != nil {
+					return err
+				}
+				value = value * float64(multiplicator)
+			}
 		}
+
 		// create a metric from this
 		if setting.MinVal != "" {
 			setting.ShortDesc += " min=" + setting.MinVal
 		}
 		if setting.MaxVal != "" {
-			setting.ShortDesc += " max=" + setting.MinVal
+			setting.ShortDesc += " max=" + setting.MaxVal
 		}
 
 		ch <- prometheus.MustNewConstMetric(

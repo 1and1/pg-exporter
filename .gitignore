@@ -1,2 +1,5 @@
 .idea
 bin/
+pg-exporter
+pid
+results/

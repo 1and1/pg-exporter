@@ -15,3 +15,13 @@ bin/pg-exporter:
 			-X github.com/prometheus/common/version.BuildUser=$(BUILD_USER) \
 			-X github.com/prometheus/common/version.BuildDate=$(BUILD_DATE)" \
 			-o bin/pg_exporter
+
+PG_CONFIG = pg_config
+PGXS = $(shell pg_config --pgxs)
+REGRESS = start \
+	  all \
+	  stat_activity \
+	  stat_database \
+	  stat_wal \
+	  stop
+include $(PGXS)

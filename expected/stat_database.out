@@ -1,0 +1,31 @@
+select current_setting('server_version_num')::int / 10000 >= 10 as is_pg_10;
+ is_pg_10 
+----------
+ t
+(1 row)
+
+\! curl -sf localhost:9135/metrics | grep "^postgresql_database_" | sed -e 's/database_id="[0-9]*"/database_id=""/' -e 's/ \([1-9]\|0\.\).*/ NNN/'
+postgresql_database_backends{database="contrib_regression",database_id=""} NNN
+postgresql_database_blk_read_seconds_total{database="contrib_regression",database_id=""} 0
+postgresql_database_blk_write_seconds_total{database="contrib_regression",database_id=""} 0
+postgresql_database_blocks_hit_total{database="contrib_regression",database_id=""} NNN
+postgresql_database_blocks_read_total{database="contrib_regression",database_id=""} NNN
+postgresql_database_conflicts_confl_bufferpin_total{database="contrib_regression",database_id=""} 0
+postgresql_database_conflicts_confl_deadlock_total{database="contrib_regression",database_id=""} 0
+postgresql_database_conflicts_confl_lock_total{database="contrib_regression",database_id=""} 0
+postgresql_database_conflicts_confl_snapshot_total{database="contrib_regression",database_id=""} 0
+postgresql_database_conflicts_confl_tablespace_total{database="contrib_regression",database_id=""} 0
+postgresql_database_conflicts_total{database="contrib_regression",database_id=""} 0
+postgresql_database_deadlocks_total{database="contrib_regression",database_id=""} 0
+postgresql_database_frozen_xid{database="contrib_regression"} NNN
+postgresql_database_min_mxid{database="contrib_regression"} NNN
+postgresql_database_rows_deleted_total{database="contrib_regression",database_id=""} 0
+postgresql_database_rows_fetched_total{database="contrib_regression",database_id=""} NNN
+postgresql_database_rows_inserted_total{database="contrib_regression",database_id=""} 0
+postgresql_database_rows_returned_total{database="contrib_regression",database_id=""} NNN
+postgresql_database_rows_updated_total{database="contrib_regression",database_id=""} 0
+postgresql_database_stats_reset{database="contrib_regression",database_id=""} NNN
+postgresql_database_temp_bytes_total{database="contrib_regression",database_id=""} 0
+postgresql_database_temp_files_total{database="contrib_regression",database_id=""} 0
+postgresql_database_xact_commited_total{database="contrib_regression",database_id=""} NNN
+postgresql_database_xact_rolledback_total{database="contrib_regression",database_id=""} 0
