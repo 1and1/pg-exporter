@@ -2,4 +2,6 @@
 bin/
 pg-exporter
 pid
+regression.diffs
+regression.out
 results/
