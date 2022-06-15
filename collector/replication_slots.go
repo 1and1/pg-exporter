@@ -3,8 +3,8 @@ package collector
 import (
 	"context"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/uptrace/bun"
 
 	"github.com/1and1/pg-exporter/collector/models"
 )
@@ -38,9 +38,9 @@ func (ScrapeReplicationSlots) Type() ScrapeType {
 }
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
-func (ScrapeReplicationSlots) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.Metric) error {
+func (ScrapeReplicationSlots) Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error {
 	statReplicationSlots := &models.PgStatReplicationSlotsSlice{}
-	if err := db.ModelContext(ctx, statReplicationSlots).Select(); err != nil {
+	if err := db.NewSelect().Model(statReplicationSlots).Scan(ctx); err != nil {
 		return err
 	}
 

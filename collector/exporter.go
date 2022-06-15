@@ -2,12 +2,15 @@ package collector
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/driver/pgdriver"
 )
 
 // Metric name parts.
@@ -40,30 +43,13 @@ var _ prometheus.Collector = (*Exporter)(nil)
 type Exporter struct {
 	ctx       context.Context
 	dsn       string
-	pgoptions *pg.Options
+	pgoptions []pgdriver.Option
 	scrapers  []Scraper
 	metrics   Metrics
 }
 
 // New returns a PostgreSQL exporter for the provided DSN.
-func New(ctx context.Context, pgoptions *pg.Options, metrics Metrics, scrapers []Scraper) *Exporter {
-	// Database exporters should only open one connection
-	pgoptions.PoolSize = 1
-	// set the lock timeout, to minimise possible production impact
-
-	// TODO: this triggers a segfault in some cases, we need to investigate why later
-	/*
-	   oldOnconnect := pgoptions.OnConnect
-	   newOnconnect := func(conn *pg.Conn) error {
-	       conn.ExecContext(ctx, "SET lock_timeout = 5")
-	       if oldOnconnect != nil {
-	           return oldOnconnect(conn)
-	       }
-	       return nil
-	   }
-
-	   pgoptions.OnConnect = newOnconnect
-	*/
+func New(ctx context.Context, pgoptions []pgdriver.Option, metrics Metrics, scrapers []Scraper) *Exporter {
 	return &Exporter{
 		ctx:       ctx,
 		pgoptions: pgoptions,
@@ -95,17 +81,31 @@ func (e *Exporter) scrape(ctx context.Context, ch chan<- prometheus.Metric) {
 
 	scrapeTime := time.Now()
 
-	db := pg.Connect(e.pgoptions)
-	defer db.Close()
+	// create a new connection
+	pgconn := pgdriver.NewConnector(e.pgoptions...)
+	sqldb := sql.OpenDB(pgconn)
+	// Only use one connection
+	sqldb.SetMaxOpenConns(1)
+	db := bun.NewDB(sqldb, pgdialect.New())
 
 	// get the database version
-	if _, err := db.QueryContext(ctx, pg.Scan(&pgversion), "SHOW server_version_num"); err != nil {
-		log.Errorln("Error getting PostgreSQL version:", err)
-		e.metrics.PgSQLUp.Set(0)
-		e.metrics.Error.Set(1)
-		return
-	}
+	{
+		rows, err := db.QueryContext(ctx, "SHOW server_version_num")
+		if err != nil {
+			log.Errorln("Error getting PostgreSQL version:", err)
+			e.metrics.PgSQLUp.Set(0)
+			e.metrics.Error.Set(1)
+			return
+		}
 
+		if err := db.ScanRows(ctx, rows, &pgversion); err != nil {
+			log.Errorln("Error parsing PostgreSQL version:", err)
+			e.metrics.PgSQLUp.Set(0)
+			e.metrics.Error.Set(1)
+			return
+		}
+		rows.Close()
+	}
 	// update our requested db list
 	if err := updateDatabaseList(ctx, db); err != nil {
 		log.Errorln("error updating database list:", err)
@@ -147,14 +147,22 @@ func (e *Exporter) scrape(ctx context.Context, ch chan<- prometheus.Metric) {
 	// collect the database scoped statistics
 	for _, dbname := range collectDatabases {
 		// copy the contents of pgoptions
-		// we don't require a deep copy, as we only change a string value at the top level
-		dboptions := *e.pgoptions
-		dboptions.Database = dbname
+		var dboptions []pgdriver.Option
+		dboptions = append(dboptions, e.pgoptions...)
+
+		// set our database name
+		dboptions = append(dboptions, pgdriver.WithDatabase(dbname))
+
 		// TODO: the exporter should open only one connection to the database instance,
 		// as we need one connection per database, this can increase here to n + 1 where n is the number of databases
 		// to scrape
-		localdb := pg.Connect(&dboptions)
-		defer localdb.Close()
+		// create a new connection
+		localconn := pgdriver.NewConnector(e.pgoptions...)
+		localsqldb := sql.OpenDB(localconn)
+		// Only use one connection
+		localsqldb.SetMaxOpenConns(1)
+		localdb := bun.NewDB(localsqldb, pgdialect.New())
+
 		for _, scraper := range e.scrapers {
 			if scraper.Type() != SCRAPELOCAL {
 				continue
@@ -164,7 +172,7 @@ func (e *Exporter) scrape(ctx context.Context, ch chan<- prometheus.Metric) {
 			}
 
 			wg.Add(1)
-			go func(scraper Scraper, dbname string, db *pg.DB) {
+			go func(scraper Scraper, dbname string, db *bun.DB) {
 				defer wg.Done()
 				label := "collect." + scraper.Name() + "." + dbname
 				scrapeTime := time.Now()

@@ -3,8 +3,8 @@ package collector
 import (
 	"context"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/uptrace/bun"
 )
 
 type ScrapeType int
@@ -29,5 +29,5 @@ type Scraper interface {
 	Type() ScrapeType
 
 	// Scrape collects data from database connection and sends it over channel as prometheus metric.
-	Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.Metric) error
+	Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error
 }

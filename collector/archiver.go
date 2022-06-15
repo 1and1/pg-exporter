@@ -3,8 +3,8 @@ package collector
 import (
 	"context"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/uptrace/bun"
 
 	"github.com/1and1/pg-exporter/collector/models"
 )
@@ -38,9 +38,9 @@ func (ScrapeArchiver) Type() ScrapeType {
 }
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
-func (ScrapeArchiver) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.Metric) error {
+func (ScrapeArchiver) Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error {
 	statArchiver := &models.PgStatArchiver{}
-	if err := db.ModelContext(ctx, statArchiver).Select(); err != nil {
+	if err := db.NewSelect().Model(statArchiver).Scan(ctx); err != nil {
 		return err
 	}
 

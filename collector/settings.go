@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/uptrace/bun"
 )
 
 const (
@@ -16,15 +16,15 @@ const (
 )
 
 type pgSetting struct {
-	tableName struct{} `pg:"pg_settings"`
-	Name      string   `pg:"name"`
-	Setting   string   `pg:"setting"`
-	ShortDesc string   `pg:"short_desc"`
-	Unit      string   `pg:"unit"`
-	Vartype   string   `pg:"vartype"`
-	MinVal    string   `pg:"min_val"`
-	MaxVal    string   `pg:"max_val"`
-	Enumvals  []string `pg:"enumvals,array"`
+	bun.BaseModel `pg:"pg_settings"`
+	Name          string   `bun:"name"`
+	Setting       string   `bun:"setting"`
+	ShortDesc     string   `bun:"short_desc"`
+	Unit          string   `bun:"unit"`
+	Vartype       string   `bun:"vartype"`
+	MinVal        string   `bun:"min_val"`
+	MaxVal        string   `bun:"max_val"`
+	Enumvals      []string `bun:"enumvals,array"`
 }
 
 // ScrapeSettings scrapes from pg_settings
@@ -51,10 +51,10 @@ func (ScrapeSettings) Type() ScrapeType {
 }
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
-func (ScrapeSettings) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.Metric) error {
+func (ScrapeSettings) Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error {
 
 	var settingsRes []pgSetting
-	if err := db.ModelContext(ctx, &settingsRes).WhereIn("vartype IN (?)", []string{"bool", "integer", "real"}).Select(); err != nil {
+	if err := db.NewSelect().Model(&settingsRes).Where("vartype IN (?)", bun.In([]string{"bool", "integer", "real"})).Scan(ctx); err != nil {
 		return err
 	}
 

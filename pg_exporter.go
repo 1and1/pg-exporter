@@ -4,17 +4,19 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
-	"github.com/tbe/pqparser/v9"
+	"github.com/uptrace/bun/driver/pgdriver"
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/1and1/pg-exporter/collector"
@@ -33,7 +35,7 @@ var (
 		"timeout-offset",
 		"Offset to subtract from timeout in seconds.",
 	).Default("0.25").Float64()
-	pgoptions *pg.Options
+	pgoptions []pgdriver.Option
 )
 
 var scrapers = map[collector.Scraper]bool{
@@ -157,14 +159,28 @@ func main() {
 	log.Infoln("Starting pg_exporter", version.Info())
 	log.Infoln("Build context", version.BuildContext())
 
-	dsn := os.Getenv("DATA_SOURCE_NAME")
-	var err error
-	pgoptions, err = pqparser.Parse(dsn)
-
-	if err != nil {
-		log.Fatalln(err)
+	// if we have a dsn, we use this for the connection
+	if dsn := os.Getenv("DATA_SOURCE_NAME"); dsn != "" {
+		pgoptions = append(pgoptions,
+			pgdriver.WithDSN(dsn), // parse the DSN
+		)
+	} else if pghost := os.Getenv("PGHOST"); pghost != "" {
+		// if we have a pghost, we check if it starts with /, if so, set to unix mode
+		if strings.HasPrefix(pghost, "/") {
+			port := os.Getenv("PGPORT")
+			if port == "" {
+				port = "5432"
+			}
+			if matched, _ := regexp.MatchString(`.*?/\.s\.PGSQL\.\d+`, pghost); !matched {
+				pghost = fmt.Sprintf(`%s/.s.PGSQL.%s`, pghost, port)
+			}
+			pgoptions = append(pgoptions,
+				pgdriver.WithNetwork("unix"),
+				pgdriver.WithAddr(pghost),
+				pgdriver.WithInsecure(true),
+			)
+		}
 	}
-
 	// Register only scrapers enabled by flag.
 	log.Infof("Enabled scrapers:")
 	enabledScrapers := []collector.Scraper{}

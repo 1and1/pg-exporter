@@ -3,8 +3,8 @@ package collector
 import (
 	"context"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/uptrace/bun"
 )
 
 const (
@@ -36,10 +36,10 @@ func (ScrapeInfo) Type() ScrapeType {
 }
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
-func (ScrapeInfo) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.Metric) error {
+func (ScrapeInfo) Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error {
 	// we reuse the definition from pg_settings
 	var settingsRes []pgSetting
-	if err := db.ModelContext(ctx, &settingsRes).WhereIn("name IN (?)", []string{"server_version"}).Select(); err != nil {
+	if err := db.NewSelect().Model(&settingsRes).Where("name IN (?)", bun.In([]string{"server_version"})).Scan(ctx); err != nil {
 		return err
 	}
 	labels := make(map[string]string)
