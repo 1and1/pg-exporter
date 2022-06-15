@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/uptrace/bun"
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/1and1/pg-exporter/collector/models"
@@ -62,7 +62,7 @@ func (ScrapeActivity) Type() ScrapeType {
 }
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
-func (ScrapeActivity) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.Metric) error {
+func (ScrapeActivity) Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error {
 	// we create a query based on the given commandline flags
 	columns := ""
 	if *withUsername {
@@ -94,7 +94,11 @@ func (ScrapeActivity) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheu
 		columns, columns)
 
 	var statActivity models.PgStatActivitySlice
-	if _, err := db.QueryContext(ctx, &statActivity, qs, pg.In(collectDatabases)); err != nil {
+	rows, err := db.QueryContext(ctx, qs, bun.In(collectDatabases))
+	if err != nil {
+		return err
+	}
+	if err := db.ScanRows(ctx, rows, &statActivity); err != nil {
 		return err
 	}
 	return statActivity.ToMetrics(namespace, activity, ch)

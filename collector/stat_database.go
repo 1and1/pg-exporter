@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/uptrace/bun"
 
 	"github.com/1and1/pg-exporter/collector/models"
 )
@@ -39,7 +39,7 @@ func (ScrapeDatabase) Type() ScrapeType {
 }
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
-func (ScrapeDatabase) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.Metric) error {
+func (ScrapeDatabase) Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error {
 	// we create a query based on the given commandline flags
 	columns := "numbackends, xact_commit, xact_rollback, blks_read, blks_hit, tup_returned, tup_fetched, tup_inserted, tup_updated, tup_deleted, conflicts, temp_files, temp_bytes, deadlocks, blk_read_time, blk_write_time"
 
@@ -56,7 +56,11 @@ func (ScrapeDatabase) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheu
 		columns)
 
 	var statDatabase models.PgStatDatabaseSlice
-	if _, err := db.QueryContext(ctx, &statDatabase, qs, pg.In(collectDatabases)); err != nil {
+	rows, err := db.QueryContext(ctx, qs, bun.In(collectDatabases))
+	if err != nil {
+		return err
+	}
+	if err := db.ScanRows(ctx, rows, &statDatabase); err != nil {
 		return err
 	}
 	if err := statDatabase.ToMetrics(namespace, statdatabase, ch); err != nil {
@@ -64,8 +68,8 @@ func (ScrapeDatabase) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheu
 	}
 
 	var databases models.PgDatabaseSlice
-	if err := db.ModelContext(ctx, &databases).Where("datname IN (?)", pg.In(collectDatabases)).
-		Select(); err != nil {
+	if err := db.NewSelect().Model(&databases).Where("datname IN (?)", bun.In(collectDatabases)).
+		Scan(ctx); err != nil {
 		return err
 	}
 	return databases.ToMetrics(namespace, statdatabase, ch)

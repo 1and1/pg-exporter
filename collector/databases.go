@@ -3,8 +3,8 @@ package collector
 import (
 	"context"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/common/log"
+	"github.com/uptrace/bun"
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/1and1/pg-exporter/collector/models"
@@ -30,7 +30,7 @@ var (
 	collectDatabases []string
 )
 
-func updateDatabaseList(ctx context.Context, db *pg.DB) error {
+func updateDatabaseList(ctx context.Context, db *bun.DB) error {
 	// prepare lookup maps
 	prepareLookup := func(in *[]string) map[string]bool {
 		lookup := make(map[string]bool)
@@ -43,8 +43,12 @@ func updateDatabaseList(ctx context.Context, db *pg.DB) error {
 	excludeLookup := prepareLookup(excludeDatabases)
 
 	var dblist []string
+	var databases []models.PgDatabase
+	if err := db.NewSelect().Model(&databases).Scan(ctx); err != nil {
+		return err
+	}
 	// iterate over all databases and check if we include or exclude them
-	err := db.ModelContext(ctx, (*models.PgDatabase)(nil)).ForEach(func(pgdb *models.PgDatabase) error {
+	for _, pgdb := range databases {
 		if len(includeLookup) > 0 {
 			if includeLookup[pgdb.Datname] {
 				dblist = append(dblist, pgdb.Datname)
@@ -54,16 +58,10 @@ func updateDatabaseList(ctx context.Context, db *pg.DB) error {
 				dblist = append(dblist, pgdb.Datname)
 			}
 		}
-		return nil
-	})
-
-	if err != nil {
-		return err
 	}
 
 	collectDatabases = dblist
 
 	log.Debugf("effective database list: %v", collectDatabases)
-
 	return nil
 }

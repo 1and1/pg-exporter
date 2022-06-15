@@ -3,8 +3,8 @@ package collector
 import (
 	"context"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/uptrace/bun"
 
 	"github.com/1and1/pg-exporter/collector/models"
 )
@@ -38,7 +38,7 @@ func (ScrapeLocks) Type() ScrapeType {
 }
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
-func (ScrapeLocks) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.Metric) error {
+func (ScrapeLocks) Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error {
 	qs := `WITH locks AS (
             SELECT l.locktype,
                    CASE
@@ -60,7 +60,11 @@ func (ScrapeLocks) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.M
         GROUP BY locktype, scope_type, database, "mode", "granted";`
 
 	var dblocks models.PgLocksSlice
-	if _, err := db.QueryContext(ctx, &dblocks, qs, pg.In(collectDatabases)); err != nil {
+	rows, err := db.QueryContext(ctx, qs, bun.In(collectDatabases))
+	if err != nil {
+		return err
+	}
+	if err := db.ScanRows(ctx, rows, &dblocks); err != nil {
 		return err
 	}
 	return dblocks.ToMetrics(namespace, locks, ch)

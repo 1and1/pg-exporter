@@ -3,8 +3,8 @@ package collector
 import (
 	"context"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/uptrace/bun"
 
 	"github.com/1and1/pg-exporter/collector/models"
 )
@@ -38,7 +38,7 @@ func (ScrapeReplication) Type() ScrapeType {
 }
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
-func (ScrapeReplication) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.Metric) error {
+func (ScrapeReplication) Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error {
 	var qs string
 	if pgversion < 100000 {
 		qs = `SELECT pid,
@@ -77,7 +77,11 @@ func (ScrapeReplication) Scrape(ctx context.Context, db *pg.DB, ch chan<- promet
             FROM pg_stat_replication;`
 	}
 	var statReplication models.PgStatReplicationSlice
-	if _, err := db.QueryContext(ctx, &statReplication, qs); err != nil {
+	rows, err := db.QueryContext(ctx, qs)
+	if err != nil {
+		return err
+	}
+	if err := db.ScanRows(ctx, rows, &statReplication); err != nil {
 		return err
 	}
 	return statReplication.ToMetrics(namespace, replication, ch)

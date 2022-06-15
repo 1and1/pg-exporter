@@ -3,8 +3,8 @@ package collector
 import (
 	"context"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/uptrace/bun"
 
 	"github.com/1and1/pg-exporter/collector/models"
 )
@@ -38,10 +38,10 @@ func (ScrapeDatabaseConflicts) Type() ScrapeType {
 }
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
-func (ScrapeDatabaseConflicts) Scrape(ctx context.Context, db *pg.DB, ch chan<- prometheus.Metric) error {
+func (ScrapeDatabaseConflicts) Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error {
 	var databaseConflict models.PgStatDatabaseConflictsSlice
-	if err := db.ModelContext(ctx, &databaseConflict).Where("datname IN (?)", pg.In(collectDatabases)).
-		Select(); err != nil {
+	if err := db.NewSelect().Model(&databaseConflict).Where("datname IN (?)", bun.In(collectDatabases)).
+		Scan(ctx); err != nil {
 		return err
 	}
 
