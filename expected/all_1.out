@@ -102,7 +102,7 @@ go_memstats_sys_bytes
 go_threads
 # HELP pg_exporter_build_info A metric with a constant '1' value labeled by version, revision, branch, and goversion from which pg_exporter was built.
 # TYPE pg_exporter_build_info gauge
-pg_exporter_build_info{branch="",goversion="",revision="",version=""}
+pg_exporter_build_info{branch="ci",goversion="",revision="xxxx",version="unittest"}
 # HELP postgresql_archiver_archived_count_total Number of WAL files that have been successfully archived
 # TYPE postgresql_archiver_archived_count_total counter
 postgresql_archiver_archived_count_total
