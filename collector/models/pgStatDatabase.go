@@ -27,7 +27,7 @@ type PgStatDatabase struct {
 	TempBytes             int64            `bun:"temp_bytes" help:"Total amount of data written to temporary files by queries in this database"  metric:"temp_bytes_total"`
 	Deadlocks             int64            `bun:"deadlocks" help:"Number of deadlocks detected in this database"  metric:"deadlocks_total"`
 	ChecksumFailures      sql.NullInt64    `bun:"checksum_failures" help:"Number of data page checksum failures detected in this database" metric:"checksum_failures_count"`                   // new in PG12
-	ChecksumLastFailure   sql.NullTime     `bun:"checksum_last_failure" help:"Time at which the last data page checksum failure was detected in this database" metric:"checksum_last_failure"` // new in PG12
+	ChecksumLastFailure   bun.NullTime     `bun:"checksum_last_failure" help:"Time at which the last data page checksum failure was detected in this database" metric:"checksum_last_failure"` // new in PG12
 	BlkReadTime           Milliseconds     `bun:"blk_read_time" help:"Time spent reading data file blocks by backends in this database" metric:"blk_read_seconds_total"`
 	BlkWriteTime          Milliseconds     `bun:"blk_write_time" help:"Time spent writing data file blocks by backends in this database" metric:"blk_write_seconds_total"`
 	SessionTime           NullMilliseconds `bun:"session_time" help:"Time spent by database sessions in this database, in milliseconds" metric:"session_time_total"`                                                       // new in PG14

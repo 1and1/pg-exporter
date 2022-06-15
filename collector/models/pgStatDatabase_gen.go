@@ -179,6 +179,16 @@ func (r *PgStatDatabase) ToMetrics(namespace string, subsystem string, ch chan<-
 			), prometheus.CounterValue, checksumFailuresCount,
 		)
 	}
+	// checksum_last_failure (CounterValue)
+	if !r.ChecksumLastFailure.IsZero() {
+		checksumLastFailure := float64(r.ChecksumLastFailure.Unix())
+
+		ch <- prometheus.MustNewConstMetric(
+			prometheus.NewDesc(
+				prometheus.BuildFQName(namespace, subsystem, `checksum_last_failure`), `Time at which the last data page checksum failure was detected in this database`, nil, labels,
+			), prometheus.CounterValue, checksumLastFailure,
+		)
+	}
 	// session_time_total (CounterValue)
 	if r.SessionTime.Valid {
 		sessionTimeTotal := r.SessionTime.Seconds()

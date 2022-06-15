@@ -91,7 +91,7 @@ func parseModel(t *types.Type) *modelDescription {
 		case "int64", "int", "time.Time", "float64",
 			"./collector/models.Milliseconds", "github.com/1and1/pg-exporter/collector/models.Milliseconds":
 			desc.metrics = append(desc.metrics, field)
-		case "database/sql.NullInt64", "database/sql.NullFloat64", "database/sql.NullTime",
+		case "database/sql.NullInt64", "database/sql.NullFloat64", "github.com/uptrace/bun/schema.NullTime",
 			"./collector/models.NullMilliseconds", "github.com/1and1/pg-exporter/collector/models.NullMilliseconds":
 			desc.optionalMetrics = append(desc.optionalMetrics, field)
 		default:
