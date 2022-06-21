@@ -102,7 +102,7 @@ go_memstats_sys_bytes
 go_threads
 # HELP pg_exporter_build_info A metric with a constant '1' value labeled by version, revision, branch, and goversion from which pg_exporter was built.
 # TYPE pg_exporter_build_info gauge
-pg_exporter_build_info{branch="",goversion="",revision="",version=""}
+pg_exporter_build_info{branch="ci",goversion="",revision="xxxx",version="unittest"}
 # HELP postgresql_archiver_archived_count_total Number of WAL files that have been successfully archived
 # TYPE postgresql_archiver_archived_count_total counter
 postgresql_archiver_archived_count_total
@@ -151,6 +151,9 @@ postgresql_bgwriter_maxwritten_clean_total
 # HELP postgresql_bgwriter_stats_reset Time at which these statistics were last reset
 # TYPE postgresql_bgwriter_stats_reset counter
 postgresql_bgwriter_stats_reset
+# HELP postgresql_database_active_time_total Time spent executing SQL statements in this database, in milliseconds
+# TYPE postgresql_database_active_time_total counter
+postgresql_database_active_time_total{database="contrib_regression",database_id=""}
 # HELP postgresql_database_backends Number of backends currently connected to this database
 # TYPE postgresql_database_backends gauge
 postgresql_database_backends{database="contrib_regression",database_id=""}
@@ -190,6 +193,9 @@ postgresql_database_deadlocks_total{database="contrib_regression",database_id=""
 # HELP postgresql_database_frozen_xid All transaction IDs before this one have been replaced with a permanent transaction ID in this database
 # TYPE postgresql_database_frozen_xid counter
 postgresql_database_frozen_xid{database="contrib_regression"}
+# HELP postgresql_database_idle_in_transaction_time_total Time spent idling while in a transaction in this database, in milliseconds
+# TYPE postgresql_database_idle_in_transaction_time_total counter
+postgresql_database_idle_in_transaction_time_total{database="contrib_regression",database_id=""}
 # HELP postgresql_database_min_mxid All multixact IDs before this one have been replaced with a transaction ID in this database
 # TYPE postgresql_database_min_mxid counter
 postgresql_database_min_mxid{database="contrib_regression"}
@@ -208,6 +214,21 @@ postgresql_database_rows_returned_total{database="contrib_regression",database_i
 # HELP postgresql_database_rows_updated_total Number of rows updated by queries in this database
 # TYPE postgresql_database_rows_updated_total counter
 postgresql_database_rows_updated_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_session_time_total Time spent by database sessions in this database, in milliseconds
+# TYPE postgresql_database_session_time_total counter
+postgresql_database_session_time_total{database="contrib_regression",database_id=""}
+# HELP postgresql_database_sessions_abandoned_count Number of database sessions to this database that were terminated because connection to the client was lost
+# TYPE postgresql_database_sessions_abandoned_count counter
+postgresql_database_sessions_abandoned_count{database="contrib_regression",database_id=""}
+# HELP postgresql_database_sessions_count Total number of sessions established to this database
+# TYPE postgresql_database_sessions_count counter
+postgresql_database_sessions_count{database="contrib_regression",database_id=""}
+# HELP postgresql_database_sessions_fatal_count Number of database sessions to this database that were terminated by fatal errors
+# TYPE postgresql_database_sessions_fatal_count counter
+postgresql_database_sessions_fatal_count{database="contrib_regression",database_id=""}
+# HELP postgresql_database_sessions_killed_count Number of database sessions to this database that were terminated by operator intervention
+# TYPE postgresql_database_sessions_killed_count counter
+postgresql_database_sessions_killed_count{database="contrib_regression",database_id=""}
 # HELP postgresql_database_stats_reset Time at which these statistics were last reset
 # TYPE postgresql_database_stats_reset counter
 postgresql_database_stats_reset{database="contrib_regression",database_id=""}

@@ -41,6 +41,9 @@ const nullMillisecondsMetric = `if r.$.Field$.Valid {
   $.VarName$ := r.$.Field$.Seconds()
 `
 
+const nullTimeMetric = `if !r.$.Field$.IsZero() {
+  $.VarName$ := float64(r.$.Field$.Unix())
+`
 
 // sql.NullInt64 metric
 const nullInt64Metric = `if r.$.Field$.Valid {

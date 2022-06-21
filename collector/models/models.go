@@ -10,7 +10,13 @@ func (m Milliseconds) Seconds() float64 {
 	return float64(m) / 1000
 }
 
-type NullMilliseconds sql.NullFloat64
+type NullMilliseconds struct {
+	sql.NullFloat64
+}
+
+func (m *NullMilliseconds) Scan(src interface{}) error {
+	return m.NullFloat64.Scan(src)
+}
 
 func (m NullMilliseconds) Seconds() float64 {
 	if m.Valid {
@@ -18,4 +24,3 @@ func (m NullMilliseconds) Seconds() float64 {
 	}
 	return 0.0
 }
-

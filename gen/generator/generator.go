@@ -144,6 +144,8 @@ func (m *mappingGen) GenerateType(c *generator.Context, t *types.Type, w io.Writ
 			tmpl = nullFloat64Metric
 		case "./collector/models.NullMilliseconds", "github.com/1and1/pg-exporter/collector/models.NullMilliseconds":
 			tmpl = nullMillisecondsMetric
+		case "github.com/uptrace/bun/schema.NullTime":
+			tmpl = nullTimeMetric
 		}
 		tmpl += "\n"
 		sw.Do(tmpl, metric)
