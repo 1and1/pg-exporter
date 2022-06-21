@@ -9,7 +9,8 @@ select current_setting('server_version_num')::int / 10000 as pg_major_version;
 -- remove Go and PostgreSQL version numbers
 -- remove postgresql_locks_count{mode="RowExclusiveLock"} line which sometimes pops up
 -- remove debug_discard_caches help since its max value depends on --enable-cassert
-\! curl -sf localhost:9135/metrics | sed -e 's/^\([a-z].*\) .*/\1/' -e 's/database_id="[0-9]*"/database_id=""/' -e 's/version="[^"]*"/version=""/' -e '/mode="RowExclusiveLock"/d' -e '/# HELP postgresql_settings_debug_discard_caches/d'
+-- remove server_version_num help since its min/max values depends on the PG version
+\! curl -sf localhost:9135/metrics | sed -e 's/^\([a-z].*\) .*/\1/' -e 's/database_id="[0-9]*"/database_id=""/' -e 's/version="[^"]*"/version=""/' -e '/mode="RowExclusiveLock"/d' -e '/# HELP postgresql_settings_debug_discard_caches/d' -e '/# HELP postgresql_settings_server_version_num/d'
 # HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
 # TYPE go_gc_duration_seconds summary
 go_gc_duration_seconds{quantile="0"}
@@ -736,7 +737,6 @@ postgresql_settings_segment_size
 # HELP postgresql_settings_seq_page_cost Sets the planner's estimate of the cost of a sequentially fetched disk page. min=0 max=1.79769e+308
 # TYPE postgresql_settings_seq_page_cost gauge
 postgresql_settings_seq_page_cost
-# HELP postgresql_settings_server_version_num Shows the server version as an integer. min=110016 max=110016
 # TYPE postgresql_settings_server_version_num gauge
 postgresql_settings_server_version_num
 # HELP postgresql_settings_shared_buffers Sets the number of shared memory buffers used by the server. min=16 max=1073741823
