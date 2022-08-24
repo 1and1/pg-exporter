@@ -1,5 +1,5 @@
-select current_setting('server_version_num')::int / 10000 >= 10 as is_pg_10;
- is_pg_10 
+select current_setting('server_version_num')::int / 10000 >= 14 as is_pg_14;
+ is_pg_14 
 ----------
  t
 (1 row)
