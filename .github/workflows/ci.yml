@@ -7,6 +7,7 @@ jobs:
     strategy:
       matrix:
         pg:
+          - 15
           - 14
           - 13
           - 12
@@ -24,8 +25,12 @@ jobs:
         run: sudo -u postgres createuser --superuser root
       - name: Check out the repo
         uses: actions/checkout@v2
+      - name: Enable backports
+        run: echo 'deb http://deb.debian.org/debian bullseye-backports main' | sudo tee -a /etc/apt/sources.list
+      - name: Run apt-get update
+        run: sudo apt-get update
       - name: Install extra build dependencies
-        run: sudo apt-get install -y golang
+        run: sudo apt-get install -y golang -t bullseye-backports
       - name: Build
         run: make REVISION="xxxx" BRANCH="ci" VERSION="unittest" BUILD_USER="ci" BUILD_DATE="0000-00-00"
       - name: Test on PostgreSQL ${{ matrix.pg }}
