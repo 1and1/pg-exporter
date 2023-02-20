@@ -33,7 +33,19 @@ func (q *AddColumnQuery) Conn(db IConn) *AddColumnQuery {
 }
 
 func (q *AddColumnQuery) Model(model interface{}) *AddColumnQuery {
-	q.setTableModel(model)
+	q.setModel(model)
+	return q
+}
+
+func (q *AddColumnQuery) Err(err error) *AddColumnQuery {
+	q.setErr(err)
+	return q
+}
+
+func (q *AddColumnQuery) Apply(fn func(*AddColumnQuery) *AddColumnQuery) *AddColumnQuery {
+	if fn != nil {
+		return fn(q)
+	}
 	return q
 }
 

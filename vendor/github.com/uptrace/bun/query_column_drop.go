@@ -31,7 +31,19 @@ func (q *DropColumnQuery) Conn(db IConn) *DropColumnQuery {
 }
 
 func (q *DropColumnQuery) Model(model interface{}) *DropColumnQuery {
-	q.setTableModel(model)
+	q.setModel(model)
+	return q
+}
+
+func (q *DropColumnQuery) Err(err error) *DropColumnQuery {
+	q.setErr(err)
+	return q
+}
+
+func (q *DropColumnQuery) Apply(fn func(*DropColumnQuery) *DropColumnQuery) *DropColumnQuery {
+	if fn != nil {
+		return fn(q)
+	}
 	return q
 }
 

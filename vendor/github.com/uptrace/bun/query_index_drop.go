@@ -36,7 +36,12 @@ func (q *DropIndexQuery) Conn(db IConn) *DropIndexQuery {
 }
 
 func (q *DropIndexQuery) Model(model interface{}) *DropIndexQuery {
-	q.setTableModel(model)
+	q.setModel(model)
+	return q
+}
+
+func (q *DropIndexQuery) Err(err error) *DropIndexQuery {
+	q.setErr(err)
 	return q
 }
 

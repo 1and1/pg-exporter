@@ -29,4 +29,7 @@ const (
 	OffsetFetch
 	SelectExists
 	UpdateFromTable
+	MSSavepoint
+	GeneratedIdentity
+	CompositeIn // ... WHERE (A,B) IN ((N, NN), (N, NN)...)
 )

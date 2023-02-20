@@ -6,8 +6,8 @@ require (
 	github.com/iancoleman/strcase v0.0.0-20190422225806-e506e3ef7365
 	github.com/prometheus/client_golang v1.7.1
 	github.com/prometheus/common v0.14.0
-	github.com/uptrace/bun v1.1.5
-	github.com/uptrace/bun/dialect/pgdialect v1.1.5
+	github.com/uptrace/bun v1.1.12
+	github.com/uptrace/bun/dialect/pgdialect v1.1.12
 	github.com/uptrace/bun/driver/pgdriver v1.1.5
 	github.com/vmihailenco/tagparser v0.1.2
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
@@ -32,7 +32,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88 // indirect
-	golang.org/x/sys v0.0.0-20220614162138-6c1b26c55098 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/tools v0.0.0-20200103221440-774c71fcf114 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	mellium.im/sasl v0.2.1 // indirect

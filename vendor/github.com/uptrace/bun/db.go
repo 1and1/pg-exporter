@@ -2,7 +2,9 @@ package bun
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"reflect"
 	"strings"
@@ -80,6 +82,10 @@ func (db *DB) NewValues(model interface{}) *ValuesQuery {
 	return NewValuesQuery(db, model)
 }
 
+func (db *DB) NewMerge() *MergeQuery {
+	return NewMergeQuery(db)
+}
+
 func (db *DB) NewSelect() *SelectQuery {
 	return NewSelectQuery(db)
 }
@@ -94,6 +100,10 @@ func (db *DB) NewUpdate() *UpdateQuery {
 
 func (db *DB) NewDelete() *DeleteQuery {
 	return NewDeleteQuery(db)
+}
+
+func (db *DB) NewRaw(query string, args ...interface{}) *RawQuery {
+	return NewRawQuery(db, query, args...)
 }
 
 func (db *DB) NewCreateTable() *CreateTableQuery {
@@ -141,13 +151,19 @@ func (db *DB) Dialect() schema.Dialect {
 }
 
 func (db *DB) ScanRows(ctx context.Context, rows *sql.Rows, dest ...interface{}) error {
+	defer rows.Close()
+
 	model, err := newModel(db, dest)
 	if err != nil {
 		return err
 	}
 
 	_, err = model.ScanRows(ctx, rows)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return rows.Err()
 }
 
 func (db *DB) ScanRow(ctx context.Context, rows *sql.Rows, dest ...interface{}) error {
@@ -318,6 +334,10 @@ func (c Conn) NewValues(model interface{}) *ValuesQuery {
 	return NewValuesQuery(c.db, model).Conn(c)
 }
 
+func (c Conn) NewMerge() *MergeQuery {
+	return NewMergeQuery(c.db).Conn(c)
+}
+
 func (c Conn) NewSelect() *SelectQuery {
 	return NewSelectQuery(c.db).Conn(c)
 }
@@ -332,6 +352,10 @@ func (c Conn) NewUpdate() *UpdateQuery {
 
 func (c Conn) NewDelete() *DeleteQuery {
 	return NewDeleteQuery(c.db).Conn(c)
+}
+
+func (c Conn) NewRaw(query string, args ...interface{}) *RawQuery {
+	return NewRawQuery(c.db, query, args...).Conn(c)
 }
 
 func (c Conn) NewCreateTable() *CreateTableQuery {
@@ -362,6 +386,46 @@ func (c Conn) NewDropColumn() *DropColumnQuery {
 	return NewDropColumnQuery(c.db).Conn(c)
 }
 
+// RunInTx runs the function in a transaction. If the function returns an error,
+// the transaction is rolled back. Otherwise, the transaction is committed.
+func (c Conn) RunInTx(
+	ctx context.Context, opts *sql.TxOptions, fn func(ctx context.Context, tx Tx) error,
+) error {
+	tx, err := c.BeginTx(ctx, opts)
+	if err != nil {
+		return err
+	}
+
+	var done bool
+
+	defer func() {
+		if !done {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if err := fn(ctx, tx); err != nil {
+		return err
+	}
+
+	done = true
+	return tx.Commit()
+}
+
+func (c Conn) BeginTx(ctx context.Context, opts *sql.TxOptions) (Tx, error) {
+	ctx, event := c.db.beforeQuery(ctx, nil, "BEGIN", nil, "BEGIN", nil)
+	tx, err := c.Conn.BeginTx(ctx, opts)
+	c.db.afterQuery(ctx, event, nil, err)
+	if err != nil {
+		return Tx{}, err
+	}
+	return Tx{
+		ctx: ctx,
+		db:  c.db,
+		Tx:  tx,
+	}, nil
+}
+
 //------------------------------------------------------------------------------
 
 type Stmt struct {
@@ -385,6 +449,8 @@ func (db *DB) PrepareContext(ctx context.Context, query string) (Stmt, error) {
 type Tx struct {
 	ctx context.Context
 	db  *DB
+	// name is the name of a savepoint
+	name string
 	*sql.Tx
 }
 
@@ -433,16 +499,48 @@ func (db *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) (Tx, error) {
 }
 
 func (tx Tx) Commit() error {
+	if tx.name == "" {
+		return tx.commitTX()
+	}
+	return tx.commitSP()
+}
+
+func (tx Tx) commitTX() error {
 	ctx, event := tx.db.beforeQuery(tx.ctx, nil, "COMMIT", nil, "COMMIT", nil)
 	err := tx.Tx.Commit()
 	tx.db.afterQuery(ctx, event, nil, err)
 	return err
 }
 
+func (tx Tx) commitSP() error {
+	if tx.Dialect().Features().Has(feature.MSSavepoint) {
+		return nil
+	}
+	query := "RELEASE SAVEPOINT " + tx.name
+	_, err := tx.ExecContext(tx.ctx, query)
+	return err
+}
+
 func (tx Tx) Rollback() error {
+	if tx.name == "" {
+		return tx.rollbackTX()
+	}
+	return tx.rollbackSP()
+}
+
+func (tx Tx) rollbackTX() error {
 	ctx, event := tx.db.beforeQuery(tx.ctx, nil, "ROLLBACK", nil, "ROLLBACK", nil)
 	err := tx.Tx.Rollback()
 	tx.db.afterQuery(ctx, event, nil, err)
+	return err
+}
+
+func (tx Tx) rollbackSP() error {
+	query := "ROLLBACK TO SAVEPOINT " + tx.name
+	if tx.Dialect().Features().Has(feature.MSSavepoint) {
+		query = "ROLLBACK TRANSACTION " + tx.name
+	}
+	_, err := tx.ExecContext(tx.ctx, query)
 	return err
 }
 
@@ -488,12 +586,70 @@ func (tx Tx) QueryRowContext(ctx context.Context, query string, args ...interfac
 
 //------------------------------------------------------------------------------
 
+func (tx Tx) Begin() (Tx, error) {
+	return tx.BeginTx(tx.ctx, nil)
+}
+
+// BeginTx will save a point in the running transaction.
+func (tx Tx) BeginTx(ctx context.Context, _ *sql.TxOptions) (Tx, error) {
+	// mssql savepoint names are limited to 32 characters
+	sp := make([]byte, 14)
+	_, err := rand.Read(sp)
+	if err != nil {
+		return Tx{}, err
+	}
+
+	qName := "SP_" + hex.EncodeToString(sp)
+	query := "SAVEPOINT " + qName
+	if tx.Dialect().Features().Has(feature.MSSavepoint) {
+		query = "SAVE TRANSACTION " + qName
+	}
+	_, err = tx.ExecContext(ctx, query)
+	if err != nil {
+		return Tx{}, err
+	}
+	return Tx{
+		ctx:  ctx,
+		db:   tx.db,
+		Tx:   tx.Tx,
+		name: qName,
+	}, nil
+}
+
+func (tx Tx) RunInTx(
+	ctx context.Context, _ *sql.TxOptions, fn func(ctx context.Context, tx Tx) error,
+) error {
+	sp, err := tx.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	var done bool
+
+	defer func() {
+		if !done {
+			_ = sp.Rollback()
+		}
+	}()
+
+	if err := fn(ctx, sp); err != nil {
+		return err
+	}
+
+	done = true
+	return sp.Commit()
+}
+
 func (tx Tx) Dialect() schema.Dialect {
 	return tx.db.Dialect()
 }
 
 func (tx Tx) NewValues(model interface{}) *ValuesQuery {
 	return NewValuesQuery(tx.db, model).Conn(tx)
+}
+
+func (tx Tx) NewMerge() *MergeQuery {
+	return NewMergeQuery(tx.db).Conn(tx)
 }
 
 func (tx Tx) NewSelect() *SelectQuery {
@@ -510,6 +666,10 @@ func (tx Tx) NewUpdate() *UpdateQuery {
 
 func (tx Tx) NewDelete() *DeleteQuery {
 	return NewDeleteQuery(tx.db).Conn(tx)
+}
+
+func (tx Tx) NewRaw(query string, args ...interface{}) *RawQuery {
+	return NewRawQuery(tx.db, query, args...).Conn(tx)
 }
 
 func (tx Tx) NewCreateTable() *CreateTableQuery {

@@ -33,7 +33,12 @@ func (q *DropTableQuery) Conn(db IConn) *DropTableQuery {
 }
 
 func (q *DropTableQuery) Model(model interface{}) *DropTableQuery {
-	q.setTableModel(model)
+	q.setModel(model)
+	return q
+}
+
+func (q *DropTableQuery) Err(err error) *DropTableQuery {
+	q.setErr(err)
 	return q
 }
 

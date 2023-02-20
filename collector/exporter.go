@@ -157,7 +157,7 @@ func (e *Exporter) scrape(ctx context.Context, ch chan<- prometheus.Metric) {
 		// as we need one connection per database, this can increase here to n + 1 where n is the number of databases
 		// to scrape
 		// create a new connection
-		localconn := pgdriver.NewConnector(e.pgoptions...)
+		localconn := pgdriver.NewConnector(dboptions...)
 		localsqldb := sql.OpenDB(localconn)
 		// Only use one connection
 		localsqldb.SetMaxOpenConns(1)

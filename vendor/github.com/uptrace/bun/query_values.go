@@ -28,12 +28,17 @@ func NewValuesQuery(db *DB, model interface{}) *ValuesQuery {
 			conn: db.DB,
 		},
 	}
-	q.setTableModel(model)
+	q.setModel(model)
 	return q
 }
 
 func (q *ValuesQuery) Conn(db IConn) *ValuesQuery {
 	q.setConn(db)
+	return q
+}
+
+func (q *ValuesQuery) Err(err error) *ValuesQuery {
+	q.setErr(err)
 	return q
 }
 

@@ -35,17 +35,30 @@ func (q *DeleteQuery) Conn(db IConn) *DeleteQuery {
 }
 
 func (q *DeleteQuery) Model(model interface{}) *DeleteQuery {
-	q.setTableModel(model)
+	q.setModel(model)
+	return q
+}
+
+func (q *DeleteQuery) Err(err error) *DeleteQuery {
+	q.setErr(err)
 	return q
 }
 
 // Apply calls the fn passing the DeleteQuery as an argument.
 func (q *DeleteQuery) Apply(fn func(*DeleteQuery) *DeleteQuery) *DeleteQuery {
-	return fn(q)
+	if fn != nil {
+		return fn(q)
+	}
+	return q
 }
 
 func (q *DeleteQuery) With(name string, query schema.QueryAppender) *DeleteQuery {
-	q.addWith(name, query)
+	q.addWith(name, query, false)
+	return q
+}
+
+func (q *DeleteQuery) WithRecursive(name string, query schema.QueryAppender) *DeleteQuery {
+	q.addWith(name, query, true)
 	return q
 }
 
@@ -122,13 +135,6 @@ func (q *DeleteQuery) Returning(query string, args ...interface{}) *DeleteQuery 
 	return q
 }
 
-func (q *DeleteQuery) hasReturning() bool {
-	if !q.db.features.Has(feature.Returning) {
-		return false
-	}
-	return q.returningQuery.hasReturning()
-}
-
 //------------------------------------------------------------------------------
 
 func (q *DeleteQuery) Operation() string {
@@ -158,7 +164,6 @@ func (q *DeleteQuery) AppendQuery(fmter schema.Formatter, b []byte) (_ []byte, e
 		return upd.AppendQuery(fmter, b)
 	}
 
-	q = q.WhereDeleted()
 	withAlias := q.db.features.Has(feature.DeleteTableAlias)
 
 	b, err = q.appendWith(fmter, b)
@@ -180,6 +185,14 @@ func (q *DeleteQuery) AppendQuery(fmter schema.Formatter, b []byte) (_ []byte, e
 	if q.hasMultiTables() {
 		b = append(b, " USING "...)
 		b, err = q.appendOtherTables(fmter, b)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if q.hasFeature(feature.Output) && q.hasReturning() {
+		b = append(b, " OUTPUT "...)
+		b, err = q.appendOutput(fmter, b)
 		if err != nil {
 			return nil, err
 		}
@@ -219,7 +232,18 @@ func (q *DeleteQuery) softDeleteSet(fmter schema.Formatter, tm time.Time) string
 
 //------------------------------------------------------------------------------
 
+func (q *DeleteQuery) Scan(ctx context.Context, dest ...interface{}) error {
+	_, err := q.scanOrExec(ctx, dest, true)
+	return err
+}
+
 func (q *DeleteQuery) Exec(ctx context.Context, dest ...interface{}) (sql.Result, error) {
+	return q.scanOrExec(ctx, dest, len(dest) > 0)
+}
+
+func (q *DeleteQuery) scanOrExec(
+	ctx context.Context, dest []interface{}, hasDest bool,
+) (sql.Result, error) {
 	if q.err != nil {
 		return nil, q.err
 	}
@@ -230,25 +254,33 @@ func (q *DeleteQuery) Exec(ctx context.Context, dest ...interface{}) (sql.Result
 		}
 	}
 
+	// Run append model hooks before generating the query.
 	if err := q.beforeAppendModel(ctx, q); err != nil {
 		return nil, err
 	}
 
+	// Generate the query before checking hasReturning.
 	queryBytes, err := q.AppendQuery(q.db.fmter, q.db.makeQueryBytes())
 	if err != nil {
 		return nil, err
+	}
+
+	useScan := hasDest || (q.hasReturning() && q.hasFeature(feature.Returning|feature.Output))
+	var model Model
+
+	if useScan {
+		var err error
+		model, err = q.getModel(dest)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	query := internal.String(queryBytes)
 
 	var res sql.Result
 
-	if hasDest := len(dest) > 0; hasDest || q.hasReturning() {
-		model, err := q.getModel(dest)
-		if err != nil {
-			return nil, err
-		}
-
+	if useScan {
 		res, err = q.scan(ctx, q, query, model, hasDest)
 		if err != nil {
 			return nil, err
@@ -285,6 +317,15 @@ func (q *DeleteQuery) afterDeleteHook(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func (q *DeleteQuery) String() string {
+	buf, err := q.AppendQuery(q.db.Formatter(), nil)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(buf)
 }
 
 //------------------------------------------------------------------------------
