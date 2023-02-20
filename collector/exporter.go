@@ -6,12 +6,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/common/log"
+	"github.com/prometheus/common/promlog"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 )
+
+var log = promlog.NewDynamic(&promlog.Config{})
 
 // Metric name parts.
 const (
@@ -92,14 +95,14 @@ func (e *Exporter) scrape(ctx context.Context, ch chan<- prometheus.Metric) {
 	{
 		rows, err := db.QueryContext(ctx, "SHOW server_version_num")
 		if err != nil {
-			log.Errorln("Error getting PostgreSQL version:", err)
+			level.Error(log).Log("Error getting PostgreSQL version:", err)
 			e.metrics.PgSQLUp.Set(0)
 			e.metrics.Error.Set(1)
 			return
 		}
 
 		if err := db.ScanRows(ctx, rows, &pgversion); err != nil {
-			log.Errorln("Error parsing PostgreSQL version:", err)
+			level.Error(log).Log("Error getting PostgreSQL version:", err)
 			e.metrics.PgSQLUp.Set(0)
 			e.metrics.Error.Set(1)
 			return
@@ -108,7 +111,7 @@ func (e *Exporter) scrape(ctx context.Context, ch chan<- prometheus.Metric) {
 	}
 	// update our requested db list
 	if err := updateDatabaseList(ctx, db); err != nil {
-		log.Errorln("error updating database list:", err)
+		level.Error(log).Log("error updating database list:", err)
 		e.metrics.PgSQLUp.Set(0)
 		e.metrics.Error.Set(1)
 		return
@@ -136,7 +139,7 @@ func (e *Exporter) scrape(ctx context.Context, ch chan<- prometheus.Metric) {
 			label := "collect." + scraper.Name()
 			scrapeTime := time.Now()
 			if err := scraper.Scrape(ctx, db, ch); err != nil {
-				log.Errorln("Error scraping for "+label+":", err)
+				level.Error(log).Log("Error scraping for "+label+":", err)
 				e.metrics.ScrapeErrors.WithLabelValues(label).Inc()
 				e.metrics.Error.Set(1)
 			}
@@ -177,7 +180,7 @@ func (e *Exporter) scrape(ctx context.Context, ch chan<- prometheus.Metric) {
 				label := "collect." + scraper.Name() + "." + dbname
 				scrapeTime := time.Now()
 				if err := scraper.Scrape(ctx, localdb, ch); err != nil {
-					log.Errorf("Error scraping for %s: %v", label, err)
+					level.Error(log).Log("Error scraping for %s: %v", label, err)
 					e.metrics.ScrapeErrors.WithLabelValues(label).Inc()
 					e.metrics.Error.Set(1)
 				}

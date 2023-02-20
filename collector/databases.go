@@ -3,7 +3,6 @@ package collector
 import (
 	"context"
 
-	"github.com/prometheus/common/log"
 	"github.com/uptrace/bun"
 	"gopkg.in/alecthomas/kingpin.v2"
 
@@ -62,6 +61,5 @@ func updateDatabaseList(ctx context.Context, db *bun.DB) error {
 
 	collectDatabases = dblist
 
-	log.Debugf("effective database list: %v", collectDatabases)
 	return nil
 }

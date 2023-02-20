@@ -12,15 +12,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/log"
+	"github.com/prometheus/common/promlog"
 	"github.com/prometheus/common/version"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/1and1/pg-exporter/collector"
 )
+
+var log = promlog.NewDynamic(&promlog.Config{})
 
 var (
 	listenAddress = kingpin.Flag(
@@ -71,11 +74,11 @@ func newHandler(metrics collector.Metrics, scrapers []collector.Scraper) http.Ha
 		if v := r.Header.Get("X-Prometheus-Scrape-Timeout-Seconds"); v != "" {
 			timeoutSeconds, err := strconv.ParseFloat(v, 64)
 			if err != nil {
-				log.Errorf("Failed to parse timeout from Prometheus header: %s", err)
+				level.Error(log).Log("Failed to parse timeout from Prometheus header: %s", err)
 			} else {
 				if *timeoutOffset >= timeoutSeconds {
 					// Ignore timeout offset if it doesn't leave time to scrape.
-					log.Errorf(
+					level.Error(log).Log(
 						"Timeout offset (--timeout-offset=%.2f) should be lower than prometheus scrape time (X-Prometheus-Scrape-Timeout-Seconds=%.2f).",
 						*timeoutOffset,
 						timeoutSeconds,
@@ -92,7 +95,7 @@ func newHandler(metrics collector.Metrics, scrapers []collector.Scraper) http.Ha
 				r = r.WithContext(ctx)
 			}
 		}
-		log.Debugln("collect query:", params)
+		level.Debug(log).Log("collect query:", params)
 
 		// Check if we have some "collect[]" query parameters.
 		if len(params) > 0 {
@@ -141,7 +144,7 @@ func main() {
 	}
 
 	// Parse flags.
-	log.AddFlags(kingpin.CommandLine)
+	// log.AddFlags(kingpin.CommandLine)
 	kingpin.Version(version.Print("pg_exporter"))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
@@ -157,8 +160,8 @@ func main() {
 </html>
 `)
 
-	log.Infoln("Starting pg_exporter", version.Info())
-	log.Infoln("Build context", version.BuildContext())
+	level.Info(log).Log("Starting pg_exporter", version.Info())
+	level.Info(log).Log("Build context", version.BuildContext())
 
 	// if we have a dsn, we use this for the connection
 	if dsn := os.Getenv("DATA_SOURCE_NAME"); dsn != "" {
@@ -183,11 +186,11 @@ func main() {
 		}
 	}
 	// Register only scrapers enabled by flag.
-	log.Infof("Enabled scrapers:")
+	level.Info(log).Log("Enabled scrapers:")
 	enabledScrapers := []collector.Scraper{}
 	for scraper, enabled := range scraperFlags {
 		if *enabled {
-			log.Infof(" --collect.%s", scraper.Name())
+			level.Info(log).Log(" --collect.%s", scraper.Name())
 			enabledScrapers = append(enabledScrapers, scraper)
 		}
 	}
@@ -197,6 +200,6 @@ func main() {
 		w.Write(landingPage)
 	})
 
-	log.Infoln("Listening on", *listenAddress)
-	log.Fatal(http.ListenAndServe(*listenAddress, nil))
+	level.Info(log).Log("Listening on ", *listenAddress)
+	level.Info(log).Log(http.ListenAndServe(*listenAddress, nil))
 }
