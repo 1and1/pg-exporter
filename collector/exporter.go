@@ -42,7 +42,7 @@ var (
 // Verify if Exporter implements prometheus.Collector
 var _ prometheus.Collector = (*Exporter)(nil)
 
-// Exporter collects MySQL metrics. It implements prometheus.Collector.
+// Exporter collects PostgreSQL metrics. It implements prometheus.Collector.
 type Exporter struct {
 	ctx       context.Context
 	dsn       string
@@ -89,6 +89,7 @@ func (e *Exporter) scrape(ctx context.Context, ch chan<- prometheus.Metric) {
 	sqldb := sql.OpenDB(pgconn)
 	// Only use one connection
 	sqldb.SetMaxOpenConns(1)
+	defer sqldb.Close()
 	db := bun.NewDB(sqldb, pgdialect.New())
 
 	// get the database version
@@ -164,6 +165,7 @@ func (e *Exporter) scrape(ctx context.Context, ch chan<- prometheus.Metric) {
 		localsqldb := sql.OpenDB(localconn)
 		// Only use one connection
 		localsqldb.SetMaxOpenConns(1)
+		defer localsqldb.Close()
 		localdb := bun.NewDB(localsqldb, pgdialect.New())
 
 		for _, scraper := range e.scrapers {

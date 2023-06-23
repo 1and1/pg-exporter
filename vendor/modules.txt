@@ -2,8 +2,8 @@
 ## explicit
 github.com/alecthomas/template
 github.com/alecthomas/template/parse
-# github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d
-## explicit
+# github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137
+## explicit; go 1.15
 github.com/alecthomas/units
 # github.com/beorn7/perks v1.0.1
 ## explicit; go 1.11
@@ -54,6 +54,7 @@ github.com/prometheus/common/expfmt
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
 github.com/prometheus/common/model
 github.com/prometheus/common/promlog
+github.com/prometheus/common/promlog/flag
 github.com/prometheus/common/version
 # github.com/prometheus/procfs v0.8.0
 ## explicit; go 1.17
@@ -63,6 +64,8 @@ github.com/prometheus/procfs/internal/util
 # github.com/spf13/pflag v1.0.3
 ## explicit
 github.com/spf13/pflag
+# github.com/stretchr/testify v1.8.2
+## explicit; go 1.13
 # github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc
 ## explicit
 github.com/tmthrgd/go-hex
