@@ -95,10 +95,10 @@ func newHandler(metrics collector.Metrics, scrapers []collector.Scraper) http.Ha
 				r = r.WithContext(ctx)
 			}
 		}
-		level.Debug(log).Log("collect query:", params)
 
 		// Check if we have some "collect[]" query parameters.
 		if len(params) > 0 {
+			level.Debug(log).Log("collectquery:", params)
 			filters := make(map[string]bool)
 			for _, param := range params {
 				filters[param] = true
