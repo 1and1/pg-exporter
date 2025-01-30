@@ -12,18 +12,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promlog"
+	"github.com/prometheus/common/promlog/flag"
 	"github.com/prometheus/common/version"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/1and1/pg-exporter/collector"
 )
-
-var log = promlog.NewDynamic(&promlog.Config{})
 
 var (
 	listenAddress = kingpin.Flag(
@@ -64,7 +64,7 @@ func init() {
 	prometheus.MustRegister(version.NewCollector("pg_exporter"))
 }
 
-func newHandler(metrics collector.Metrics, scrapers []collector.Scraper) http.HandlerFunc {
+func newHandler(metrics collector.Metrics, scrapers []collector.Scraper, logger log.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		filteredScrapers := scrapers
 		params := r.URL.Query()["collect[]"]
@@ -74,15 +74,11 @@ func newHandler(metrics collector.Metrics, scrapers []collector.Scraper) http.Ha
 		if v := r.Header.Get("X-Prometheus-Scrape-Timeout-Seconds"); v != "" {
 			timeoutSeconds, err := strconv.ParseFloat(v, 64)
 			if err != nil {
-				level.Error(log).Log("Failed to parse timeout from Prometheus header: %s", err)
+				level.Error(logger).Log("msg", "Failed to parse timeout from Prometheus header", "err", err)
 			} else {
 				if *timeoutOffset >= timeoutSeconds {
 					// Ignore timeout offset if it doesn't leave time to scrape.
-					level.Error(log).Log(
-						"Timeout offset (--timeout-offset=%.2f) should be lower than prometheus scrape time (X-Prometheus-Scrape-Timeout-Seconds=%.2f).",
-						*timeoutOffset,
-						timeoutSeconds,
-					)
+					level.Error(logger).Log("msg", "Timeout offset should be lower than prometheus scrape timeout", "offset", *timeoutOffset, "prometheus_scrape_timeout", timeoutSeconds)
 				} else {
 					// Subtract timeout offset from timeout.
 					timeoutSeconds -= *timeoutOffset
@@ -95,7 +91,6 @@ func newHandler(metrics collector.Metrics, scrapers []collector.Scraper) http.Ha
 				r = r.WithContext(ctx)
 			}
 		}
-		level.Debug(log).Log("collect query:", params)
 
 		// Check if we have some "collect[]" query parameters.
 		if len(params) > 0 {
@@ -144,10 +139,12 @@ func main() {
 	}
 
 	// Parse flags.
-	// log.AddFlags(kingpin.CommandLine)
+	promlogConfig := &promlog.Config{}
+	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 	kingpin.Version(version.Print("pg_exporter"))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
+	logger := promlog.New(promlogConfig)
 
 	// landingPage contains the HTML served at '/'.
 	// TODO: Make this nicer and more informative.
@@ -160,8 +157,8 @@ func main() {
 </html>
 `)
 
-	level.Info(log).Log("Starting pg_exporter", version.Info())
-	level.Info(log).Log("Build context", version.BuildContext())
+	level.Info(logger).Log("Starting pg_exporter", version.Info())
+	level.Info(logger).Log("Build context", version.BuildContext())
 
 	// if we have a dsn, we use this for the connection
 	if dsn := os.Getenv("DATA_SOURCE_NAME"); dsn != "" {
@@ -186,20 +183,19 @@ func main() {
 		}
 	}
 	// Register only scrapers enabled by flag.
-	level.Info(log).Log("Enabled scrapers:")
 	enabledScrapers := []collector.Scraper{}
 	for scraper, enabled := range scraperFlags {
 		if *enabled {
-			level.Info(log).Log(" --collect.%s", scraper.Name())
+			level.Info(logger).Log("msg", "Scraper enabled", "scraper", scraper.Name())
 			enabledScrapers = append(enabledScrapers, scraper)
 		}
 	}
-	handlerFunc := newHandler(collector.NewMetrics(), enabledScrapers)
+	handlerFunc := newHandler(collector.NewMetrics(), enabledScrapers, logger)
 	http.Handle(*metricPath, promhttp.InstrumentMetricHandler(prometheus.DefaultRegisterer, handlerFunc))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(landingPage)
 	})
 
-	level.Info(log).Log("Listening on ", *listenAddress)
-	level.Info(log).Log(http.ListenAndServe(*listenAddress, nil))
+	level.Info(logger).Log("msg", "Listening on", "address", *listenAddress)
+	level.Info(logger).Log(http.ListenAndServe(*listenAddress, nil))
 }
