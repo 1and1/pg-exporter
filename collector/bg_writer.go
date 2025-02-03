@@ -39,10 +39,21 @@ func (ScrapeBgWriter) Type() ScrapeType {
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
 func (ScrapeBgWriter) Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error {
-	statBgwriter := &models.PgStatBgWriter{}
-	if err := db.NewSelect().Model(statBgwriter).Scan(ctx); err != nil {
-		return err
-	}
+    if pgversion < 170000 {
+        statBgwriter := &models.PgStatBgWriter{}
 
-	return statBgwriter.ToMetrics(namespace, bgwriter, ch)
+        if err := db.NewSelect().Model(statBgwriter).Scan(ctx); err != nil {
+            return err
+        }
+
+        return statBgwriter.ToMetrics(namespace, bgwriter, ch)
+    } else {
+
+	    statBgwriter := &models.PgStatBgWriter17{}
+        if err := db.NewSelect().Model(statBgwriter).Scan(ctx); err != nil {
+            return err
+        }
+
+        return statBgwriter.ToMetrics(namespace, bgwriter, ch)
+    }
 }
