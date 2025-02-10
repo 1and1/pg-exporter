@@ -100,7 +100,7 @@ github.com/vmihailenco/tagparser/internal/parser
 github.com/vmihailenco/tagparser/v2
 github.com/vmihailenco/tagparser/v2/internal
 github.com/vmihailenco/tagparser/v2/internal/parser
-# golang.org/x/crypto v0.6.0
+# golang.org/x/crypto v0.31.0
 ## explicit; go 1.17
 golang.org/x/crypto/pbkdf2
 # golang.org/x/mod v0.3.0
@@ -129,7 +129,7 @@ golang.org/x/tools/internal/imports
 ## explicit; go 1.11
 golang.org/x/xerrors
 golang.org/x/xerrors/internal
-# google.golang.org/protobuf v1.28.1
+# google.golang.org/protobuf v1.33.0
 ## explicit; go 1.11
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
