@@ -58,6 +58,7 @@ to use a connection string, it could be provided via the `DATA_SOURCE_NAME` vari
 | collect.pg_stat_replication                | all                 | Collect from pg_stat_replication               |
 | collect.pg_prepared_xacts                  | all                 | Collect from pg_prepared_xacts                 |
 | collect.pg_statio_user_tables              | all                 | Collect from pg_statio_user_tables             |
+| collect.pg_stat_checkpointer               | >= 17               | Collect from pg_stat_checkpointer              |
 
 
 ### General Flags
