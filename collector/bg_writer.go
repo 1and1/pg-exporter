@@ -2,7 +2,7 @@ package collector
 
 import (
 	"context"
-
+    "fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/uptrace/bun"
 
@@ -39,21 +39,25 @@ func (ScrapeBgWriter) Type() ScrapeType {
 
 // Scrape collects data from database connection and sends it over channel as prometheus metric.
 func (ScrapeBgWriter) Scrape(ctx context.Context, db *bun.DB, ch chan<- prometheus.Metric) error {
+    // var qs string
+    columns := ""
     if pgversion < 170000 {
-        statBgwriter := &models.PgStatBgWriter{}
-
-        if err := db.NewSelect().Model(statBgwriter).Scan(ctx); err != nil {
-            return err
-        }
-
-        return statBgwriter.ToMetrics(namespace, bgwriter, ch)
-    } else {
-
-	    statBgwriter := &models.PgStatBgWriter17{}
-        if err := db.NewSelect().Model(statBgwriter).Scan(ctx); err != nil {
-            return err
-        }
-
-        return statBgwriter.ToMetrics(namespace, bgwriter, ch)
+            columns += "buffers_alloc, buffers_backend, buffers_backend_fsync, buffers_checkpoint, buffers_clean, checkpoint_sync_time, checkpoint_write_time, checkpoints_req, checkpoints_timed, maxwritten_clean, stats_reset"
     }
+
+    if pgversion >= 170000 {
+            columns += "buffers_alloc, buffers_clean, maxwritten_clean, stats_reset"
+    }
+
+    qs := fmt.Sprintf(`SELECT %s FROM pg_stat_bgwriter`, columns)
+
+    var statBgwriter models.PgStatBgWriter
+    rows, err := db.QueryContext(ctx, qs)
+    if err != nil {
+        return err
+    }
+    if err := db.ScanRows(ctx, rows, &statBgwriter); err != nil {
+        return err
+    }
+    return statBgwriter.ToMetrics(namespace, bgwriter, ch)
 }

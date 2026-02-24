@@ -29,11 +29,11 @@ func (r *PgStatWal) ToMetrics(namespace string, subsystem string, ch chan<- prom
 	)
 
 	// bytes_total (CounterValue)
-	bytesTotal := float64(r.WalBytes)
+
 	ch <- prometheus.MustNewConstMetric(
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, `bytes_total`), `Total amount of WAL generated in bytes`, nil, labels,
-		), prometheus.CounterValue, bytesTotal,
+		), prometheus.CounterValue, r.WalBytes,
 	)
 
 	// buffers_full_count (CounterValue)
@@ -42,38 +42,6 @@ func (r *PgStatWal) ToMetrics(namespace string, subsystem string, ch chan<- prom
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, `buffers_full_count`), `Number of times WAL data was written to disk because WAL buffers became full`, nil, labels,
 		), prometheus.CounterValue, buffersFullCount,
-	)
-
-	// write_count (CounterValue)
-	writeCount := float64(r.WalWrite)
-	ch <- prometheus.MustNewConstMetric(
-		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, subsystem, `write_count`), `Number of times WAL buffers were written out to disk via XLogWrite request`, nil, labels,
-		), prometheus.CounterValue, writeCount,
-	)
-
-	// sync_count (CounterValue)
-	syncCount := float64(r.WalSync)
-	ch <- prometheus.MustNewConstMetric(
-		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, subsystem, `sync_count`), `Number of times WAL files were synced to disk via issue_xlog_fsync request`, nil, labels,
-		), prometheus.CounterValue, syncCount,
-	)
-
-	// write_time_total (CounterValue)
-
-	ch <- prometheus.MustNewConstMetric(
-		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, subsystem, `write_time_total`), `Total amount of time spent writing WAL buffers to disk via XLogWrite request, in milliseconds`, nil, labels,
-		), prometheus.CounterValue, r.WalWriteTime,
-	)
-
-	// sync_time_total (CounterValue)
-
-	ch <- prometheus.MustNewConstMetric(
-		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, subsystem, `sync_time_total`), `Total amount of time spent syncing WAL files to disk via issue_xlog_fsync request, in milliseconds`, nil, labels,
-		), prometheus.CounterValue, r.WalSyncTime,
 	)
 
 	// stats_reset (CounterValue)
@@ -90,6 +58,46 @@ func (r *PgStatWal) ToMetrics(namespace string, subsystem string, ch chan<- prom
 	)
 
 	// optional metrics
+	// write_count (CounterValue)
+	if r.WalWrite.Valid {
+		writeCount := float64(r.WalWrite.Int64)
+
+		ch <- prometheus.MustNewConstMetric(
+			prometheus.NewDesc(
+				prometheus.BuildFQName(namespace, subsystem, `write_count`), `Number of times WAL buffers were written out to disk via XLogWrite request`, nil, labels,
+			), prometheus.CounterValue, writeCount,
+		)
+	}
+	// sync_count (CounterValue)
+	if r.WalSync.Valid {
+		syncCount := float64(r.WalSync.Int64)
+
+		ch <- prometheus.MustNewConstMetric(
+			prometheus.NewDesc(
+				prometheus.BuildFQName(namespace, subsystem, `sync_count`), `Number of times WAL files were synced to disk via issue_xlog_fsync request`, nil, labels,
+			), prometheus.CounterValue, syncCount,
+		)
+	}
+	// write_time_total (CounterValue)
+	if r.WalWriteTime.Valid {
+		writeTimeTotal := r.WalWriteTime.Float64
+
+		ch <- prometheus.MustNewConstMetric(
+			prometheus.NewDesc(
+				prometheus.BuildFQName(namespace, subsystem, `write_time_total`), `Total amount of time spent writing WAL buffers to disk via XLogWrite request, in milliseconds`, nil, labels,
+			), prometheus.CounterValue, writeTimeTotal,
+		)
+	}
+	// sync_time_total (CounterValue)
+	if r.WalSyncTime.Valid {
+		syncTimeTotal := r.WalSyncTime.Float64
+
+		ch <- prometheus.MustNewConstMetric(
+			prometheus.NewDesc(
+				prometheus.BuildFQName(namespace, subsystem, `sync_time_total`), `Total amount of time spent syncing WAL files to disk via issue_xlog_fsync request, in milliseconds`, nil, labels,
+			), prometheus.CounterValue, syncTimeTotal,
+		)
+	}
 
 	return nil
 }
